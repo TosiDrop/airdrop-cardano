@@ -1,0 +1,54 @@
+.navbar {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  padding: var(--std-separator-width) 0;
+  align-items: center;
+  flex-direction: row-reverse;
+  --navbar-el-height: 35px;
+
+  &__button {
+    box-shadow: var(--std-box-shadow) !important;
+    height: var(--navbar-el-height) !important;
+  }
+
+  & > * {
+    margin-right: var(--std-separator-width);
+  }
+
+  &__select-wallet {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__select-wallet > * {
+    width: 100%;
+    margin-bottom: var(--std-separator-width);
+  }
+
+  &__select-wallet > *:last-child {
+    margin-bottom: 0;
+  }
+
+  &__logo {
+    height: var(--navbar-el-height);
+    margin-right: auto;
+  }
+}
+
+.navbar-dark {
+  &__button {
+    background: var(--dt-btn-color) !important;
+    border-width: 0px !important;
+    color: var(--lt-color) !important;
+  }
+}
+
+.navbar-light {
+  &__button {
+    background: var(--lt-btn-color) !important;
+    border-width: 0px !important;
+    color: var(--dt-color) !important;
+  }
+}

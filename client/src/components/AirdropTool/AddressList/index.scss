@@ -1,0 +1,15 @@
+.address-list {
+  &__status {
+    font-style: italic;
+    font-weight: 700;
+    margin-bottom: var(--std-separator-width);
+  }
+  &__list {
+    max-height: 100px;
+    overflow-y: auto;
+    background-color: rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
+    padding: var(--std-separator-width);
+    border-radius: var(--border-radius-small);
+  }
+}
