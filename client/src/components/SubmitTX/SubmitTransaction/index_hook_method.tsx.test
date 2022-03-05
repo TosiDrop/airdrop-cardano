@@ -1,0 +1,49 @@
+import { Button, Input, InputNumber} from "@arco-design/web-react";
+import { IconSend } from "@arco-design/web-react/icon";
+import { useState } from "react";
+import { useSelector, RootStateOrAny } from "react-redux";
+//import  submitTX from "hooks/submit"
+import "./index.scss";
+import { TransactionUnspentOutput, Transaction, TransactionWitnessSet } from "@emurgo/cardano-serialization-lib-asmjs";
+let Buffer = require("buffer").Buffer;
+const COMPONENT_CLASS = "token-detail";
+const [tx, setCustomTx] = useState<any>(0);
+const api = useSelector((state: RootStateOrAny) => state.blockchain.api);
+export default function TokenDetail(api:any, tx:any) {
+
+  const submit = (api,tx) => {
+    console.log(`Sending ${totalTokenToBeAirdropped} ${selectedToken.name}...`);
+  };
+  
+  
+
+    
+
+    
+
+return {
+  submit: submit,
+}
+
+};
+
+  return (
+    <div className={COMPONENT_CLASS}>
+      <div className={`${COMPONENT_CLASS}__row`}>
+        <span>Paste signed CBOR hex</span>
+        <Input
+          min={0}
+          onChange={setCustomTx}
+        />
+      </div>
+      <div className={`${COMPONENT_CLASS}__row`}>
+        <Button
+          onClick={() => TokenDetail(api,tx)}
+        >
+          Airdrop
+          <IconSend />
+        </Button>
+      </div>
+    </div>
+  );
+}
