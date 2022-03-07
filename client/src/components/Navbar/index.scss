@@ -34,6 +34,7 @@
   &__logo {
     height: var(--navbar-el-height);
     margin-right: auto;
+    margin-left: var(--std-separator-width);
   }
 }
 
