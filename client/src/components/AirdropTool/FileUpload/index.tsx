@@ -14,9 +14,9 @@ export default function FileUpload() {
     const file = fileList[0].originFile as Blob;
     reader.readAsText(file);
     reader.onload = function () {
-      let addresses = reader.result as string;
-      const addressArray = addresses!.split("\r\n");
-      if (addressArray[addressArray.length - 1] === "") addressArray.pop();
+      const addressAmountParsed = csvToArray(reader.result as string);
+      const { addressArray, amountArray } =
+        splitAmountArray(addressAmountParsed);
       dispatch(updateAddressArray(addressArray));
     };
   }, [dispatch, fileList]);
@@ -37,4 +37,28 @@ export default function FileUpload() {
       <Button>Add addresses</Button>
     </Upload>
   );
+}
+
+function csvToArray(csv: string): string[] {
+  const parsedCsv = csv.split("\r\n");
+  if (parsedCsv[parsedCsv.length - 1] === "") parsedCsv.pop();
+  return parsedCsv;
+}
+
+function splitAmountArray(addressAmountParsed: string[]): {
+  addressArray: string[];
+  amountArray: number[];
+} {
+  const addressArray: string[] = [];
+  const amountArray: number[] = [];
+  let temp: string[] = [];
+  for (let addressAmountInfo of addressAmountParsed) {
+    temp = addressAmountInfo.split(",");
+    addressArray.push(temp[0]);
+    amountArray.push(Number(Number(temp[1]).toFixed(2)));
+  }
+  return {
+    addressArray,
+    amountArray,
+  };
 }
