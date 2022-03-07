@@ -9,6 +9,7 @@ const initialState: GlobalState = {
     amount: 0,
   },
   addressArray: [],
+  totalAmountToAirdrop: 0,
 };
 
 export const globalSlice = createSlice({
@@ -27,6 +28,7 @@ export const globalSlice = createSlice({
     },
     updateAddressArray: (state, { payload }: PayloadAction<AddressAmount[]>) => {
       state.addressArray = payload;
+      state.totalAmountToAirdrop = payload.reduce((sum, item) => (sum += item.amount), 0)
     },
   },
 });
