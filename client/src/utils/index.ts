@@ -28,6 +28,6 @@ export interface AssetsSummary {
 }
 
 export interface AddressAmount {
-  address: string,
-  amount: number,
+  address: string;
+  amount: number;
 }

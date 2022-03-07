@@ -26,9 +26,15 @@ export const globalSlice = createSlice({
       state.selectedToken.name = payload.name;
       state.selectedToken.amount = payload.amount;
     },
-    updateAddressArray: (state, { payload }: PayloadAction<AddressAmount[]>) => {
+    updateAddressArray: (
+      state,
+      { payload }: PayloadAction<AddressAmount[]>
+    ) => {
       state.addressArray = payload;
-      state.totalAmountToAirdrop = payload.reduce((sum, item) => (sum += item.amount), 0)
+      state.totalAmountToAirdrop = payload.reduce(
+        (sum, item) => (sum += item.amount),
+        0
+      );
     },
   },
 });
