@@ -5,7 +5,7 @@ import useWallet from "hooks/useWallet";
 import { useEffect, useState } from "react";
 import { RootStateOrAny, useSelector } from "react-redux";
 import { WalletName } from "utils";
-import Logo from "assets/logo.png"
+import Logo from "assets/logo.png";
 import "./index.scss";
 
 const CONTAINER_CLASS = "navbar";

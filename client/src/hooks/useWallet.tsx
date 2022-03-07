@@ -82,7 +82,7 @@ export default function useWallet() {
     } catch (err) {
       console.log(err);
     }
-    
+
     return assetsSummary;
   };
 
