@@ -4,7 +4,7 @@
     margin: 0;
   }
   &__row {
-    margin-bottom: calc(1.5 * var(--std-separator-width));
+    margin-bottom: var(--std-separator-width);
     display: flex;
     flex-direction: row;
     text-align: left;

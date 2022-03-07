@@ -22,16 +22,6 @@ export default function TokenDetail() {
   return (
     <div className={COMPONENT_CLASS}>
       <div className={`${COMPONENT_CLASS}__row`}>
-        <span>Tokens per wallet</span>
-        <InputNumber
-          min={0}
-          defaultValue={tokenPerWallet}
-          step={1}
-          precision={2}
-          onChange={setTokenPerWallet}
-        />
-      </div>
-      <div className={`${COMPONENT_CLASS}__row`}>
         <span>Balance in wallet</span>
         <span>
           {(selectedToken.amount / 1000000).toFixed(2)} {selectedToken.name}
