@@ -1,4 +1,5 @@
 import { useSelector, RootStateOrAny } from "react-redux";
+import { AddressAmount } from 'utils'
 import "./index.scss";
 
 export default function AddressList() {
@@ -10,8 +11,8 @@ export default function AddressList() {
         {addressArray.length} address added
       </div>
       <div className={`${COMPONENT_CLASS}__list`}>
-        {addressArray.map((addr: string, i: number) => (
-          <div key={i}>{addr}</div>
+        {addressArray.map(({ address, amount }: AddressAmount, i: number) => (
+          <div key={i}>{`addr1...${address.slice(address.length - 8)}: ${amount}`}</div>
         ))}
       </div>
     </div>

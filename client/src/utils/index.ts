@@ -7,8 +7,7 @@ export interface GlobalState {
   darkTheme: boolean;
   tokenArray: Token[];
   selectedToken: Token;
-  addressArray: string[];
-  totalTokenToAirdrop: number;
+  addressArray: AddressAmount[];
 }
 
 export type API = object | undefined;
@@ -25,4 +24,9 @@ export enum WalletName {
 
 export interface AssetsSummary {
   [key: string]: number;
+}
+
+export interface AddressAmount {
+  address: string,
+  amount: number,
 }

@@ -4,8 +4,8 @@ import { UploadItem } from "@arco-design/web-react/es/Upload";
 import { useDispatch } from "react-redux";
 import {
   updateAddressArray,
-  updateTotalTokenToAirdrop,
 } from "reducers/globalSlice";
+import { AddressAmount } from 'utils'
 import "./index.scss";
 
 export default function FileUpload() {
@@ -18,14 +18,9 @@ export default function FileUpload() {
     reader.readAsText(file);
     reader.onload = function () {
       const addressAmountParsed = csvToArray(reader.result as string);
-      const { addressArray, amountArray } =
+      const addressAmountArray =
         splitAmountArray(addressAmountParsed);
-      const totalAmount = amountArray.reduce((prev, cur) => {
-        prev += cur;
-        return prev;
-      }, 0);
-      dispatch(updateAddressArray(addressArray));
-      dispatch(updateTotalTokenToAirdrop(totalAmount));
+      dispatch(updateAddressArray(addressAmountArray));
     };
   }, [dispatch, fileList]);
 
@@ -53,20 +48,15 @@ function csvToArray(csv: string): string[] {
   return parsedCsv;
 }
 
-function splitAmountArray(addressAmountParsed: string[]): {
-  addressArray: string[];
-  amountArray: number[];
-} {
-  const addressArray: string[] = [];
-  const amountArray: number[] = [];
+function splitAmountArray(addressAmountParsed: string[]): AddressAmount[] { 
+  const res: AddressAmount[] = []
   let temp: string[] = [];
   for (let addressAmountInfo of addressAmountParsed) {
     temp = addressAmountInfo.split(",");
-    addressArray.push(temp[0]);
-    amountArray.push(Number(Number(temp[1]).toFixed(2)));
+    res.push({
+      address: temp[0],
+      amount: Number(Number(temp[1]).toFixed(2))
+    })
   }
-  return {
-    addressArray,
-    amountArray,
-  };
+  return res;
 }
