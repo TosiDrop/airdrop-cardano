@@ -7,16 +7,14 @@ import "./index.scss";
 const COMPONENT_CLASS = "token-detail";
 
 export default function TokenDetail() {
-  const [tokenPerWallet, setTokenPerWallet] = useState(0);
-  const { selectedToken, addressArray } = useSelector(
+  const { selectedToken, addressArray, totalTokenToAirdrop } = useSelector(
     (state: RootStateOrAny) => state.global
   );
 
   const addressArrayLength = addressArray.length;
-  const totalTokenToBeAirdropped = tokenPerWallet * addressArrayLength;
 
   const sendToken = () => {
-    console.log(`Sending ${totalTokenToBeAirdropped} ${selectedToken.name}...`);
+    console.log(`Sending ${totalTokenToAirdrop} ${selectedToken.name}...`);
   };
 
   return (
@@ -30,7 +28,7 @@ export default function TokenDetail() {
       <div className={`${COMPONENT_CLASS}__row`}>
         <span>Total tokens to be airdropped</span>
         <span>
-          {totalTokenToBeAirdropped} {selectedToken.name}
+          {totalTokenToAirdrop} {selectedToken.name}
         </span>
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
@@ -41,8 +39,7 @@ export default function TokenDetail() {
         <Button
           onClick={sendToken}
           disabled={
-            tokenPerWallet === 0 ||
-            typeof tokenPerWallet !== "number" ||
+            totalTokenToAirdrop === 0 ||
             selectedToken.name === "" ||
             addressArrayLength === 0
           }

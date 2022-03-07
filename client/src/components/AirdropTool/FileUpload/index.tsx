@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { Upload, Button } from "@arco-design/web-react";
 import { UploadItem } from "@arco-design/web-react/es/Upload";
 import { useDispatch } from "react-redux";
-import { updateAddressArray } from "reducers/globalSlice";
+import {
+  updateAddressArray,
+  updateTotalTokenToAirdrop,
+} from "reducers/globalSlice";
 import "./index.scss";
 
 export default function FileUpload() {
@@ -17,7 +20,12 @@ export default function FileUpload() {
       const addressAmountParsed = csvToArray(reader.result as string);
       const { addressArray, amountArray } =
         splitAmountArray(addressAmountParsed);
+      const totalAmount = amountArray.reduce((prev, cur) => {
+        prev += cur;
+        return prev;
+      }, 0);
       dispatch(updateAddressArray(addressArray));
+      dispatch(updateTotalTokenToAirdrop(totalAmount));
     };
   }, [dispatch, fileList]);
 

@@ -8,6 +8,7 @@ export interface GlobalState {
   tokenArray: Token[];
   selectedToken: Token;
   addressArray: string[];
+  totalTokenToAirdrop: number;
 }
 
 export type API = object | undefined;

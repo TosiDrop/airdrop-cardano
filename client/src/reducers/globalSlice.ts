@@ -9,6 +9,7 @@ const initialState: GlobalState = {
     amount: 0,
   },
   addressArray: [],
+  totalTokenToAirdrop: 0,
 };
 
 export const globalSlice = createSlice({
@@ -28,6 +29,9 @@ export const globalSlice = createSlice({
     updateAddressArray: (state, { payload }: PayloadAction<string[]>) => {
       state.addressArray = payload;
     },
+    updateTotalTokenToAirdrop: (state, { payload }: PayloadAction<number>) => {
+      state.totalTokenToAirdrop = payload;
+    },
   },
 });
 
@@ -36,6 +40,7 @@ export const {
   updateTokenArray,
   updateSelectedToken,
   updateAddressArray,
+  updateTotalTokenToAirdrop,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;
