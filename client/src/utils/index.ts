@@ -1,6 +1,7 @@
 export interface Token {
   name: string;
   amount: number;
+  decimals: number;
 }
 
 export interface GlobalState {
@@ -23,8 +24,22 @@ export enum WalletName {
   CCVAULT = "ccvault",
 }
 
+// policy ID => asset name in hex => amount
 export interface AssetsSummary {
+  [key: string]: {
+    [key: string]: number;
+  };
+}
+
+export interface AssetsAmount {
   [key: string]: number;
+}
+
+export interface AssetsDetail {
+  decimals: number;
+  ticker: string;
+  policy_id: string;
+  name_hex: string;
 }
 
 export interface AddressAmount {

@@ -13,19 +13,18 @@ export default function TokenSelect() {
   const dispatch = useDispatch();
 
   return (
-    <Select
-      placeholder="Select token"
-      // onChange={(value) => }
-      showSearch
-      disabled={!tokenArray.length}
-    >
+    <Select placeholder="Select token" showSearch disabled={!tokenArray.length}>
       {tokenArray.map((token: Token, index: number) => (
         <Option
           key={index}
           value={token.name}
           onClick={() =>
             dispatch(
-              updateSelectedToken({ name: token.name, amount: token.amount })
+              updateSelectedToken({
+                name: token.name,
+                amount: token.amount,
+                decimals: token.decimals,
+              })
             )
           }
         >

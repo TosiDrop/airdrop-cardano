@@ -1,8 +1,8 @@
 import { useDispatch } from "react-redux";
 import { setApi } from "reducers/blockchainSlice";
-import { WalletName, API, AssetsSummary } from "utils";
+import { WalletName, API, AssetsSummary, Token, AssetsDetail } from "utils";
 import { TransactionUnspentOutput } from "@emurgo/cardano-serialization-lib-asmjs";
-// import axios from 'axios';
+import axios from "axios";
 let Buffer = require("buffer").Buffer;
 
 export default function useWallet() {
@@ -29,10 +29,9 @@ export default function useWallet() {
     }
   };
 
-  const getWalletSummary = async (API: any): Promise<AssetsSummary> => {
-    let assetsSummary: AssetsSummary = {
-      ADA: 0,
-    };
+  const getWalletSummary = async (API: any): Promise<Token[]> => {
+    let adaAmount = 0;
+    let assetsSummary: AssetsSummary = {};
 
     try {
       /**
@@ -43,7 +42,7 @@ export default function useWallet() {
 
       for (const rawUtxo of rawUtxos) {
         const { amount, multiasset } = parseUtxo(rawUtxo);
-        assetsSummary["ADA"] += Number(amount);
+        adaAmount += Number(amount);
 
         if (multiasset) {
           /**
@@ -64,17 +63,24 @@ export default function useWallet() {
             const policyIdString = convertBufferToHex(policyId.to_bytes());
 
             if (!assetsSummary[policyIdString]) {
-              assetsSummary[policyIdString] = 0;
+              assetsSummary[policyIdString] = {};
             }
 
-            /**
-             * Check a specific policy ID
-             */
             for (let j = 0; j < K; j++) {
               const assetName = assetNames.get(j);
+              const assetNameHex = Buffer.from(
+                (assetName as any).name(),
+                "utf8"
+              ).toString("hex");
               const multiassetAmt = multiasset.get_asset(policyId, assetName);
               const assetAmount = multiassetAmt.to_str();
-              assetsSummary[policyIdString] += Number(assetAmount);
+              if (!assetsSummary[policyIdString][assetNameHex]) {
+                assetsSummary[policyIdString][assetNameHex] =
+                  Number(assetAmount);
+              } else {
+                assetsSummary[policyIdString][assetNameHex] +=
+                  Number(assetAmount);
+              }
             }
           }
         }
@@ -83,7 +89,13 @@ export default function useWallet() {
       console.log(err);
     }
 
-    return assetsSummary;
+    const assetsDetails = await getAssetDetails(assetsSummary);
+    const assetsAmount = getAssetsAmount(
+      adaAmount,
+      assetsSummary,
+      assetsDetails
+    );
+    return assetsAmount;
   };
 
   return {
@@ -108,18 +120,40 @@ function convertBufferToHex(inBuffer: Uint8Array): string {
   return inString;
 }
 
-// async function getTokenData (tokens: AssetsSummary) {
-//   const uri = "https://tokens.cardano.org/metadata/"
+async function getAssetDetails(assetsSummary: AssetsSummary) {
+  const url = "https://token-registry-api.apexpool.info/api/v0/tokens";
+  const tokens: { policy_id: string; token_name: string }[] = [];
+  for (let policyId in assetsSummary) {
+    for (let assetName in assetsSummary[policyId]) {
+      tokens.push({
+        policy_id: policyId,
+        token_name: assetName,
+      });
+    }
+  }
+  const res = await axios.post(url, { tokens });
+  return res.data;
+}
 
-//   const body = JSON.stringify({
-//     subjects: [...Object.keys(tokens)],
-//     properties: ["ticker"]
-//   })
-
-//   const headers = {
-//     'content-type': 'application/json;charset=utf-8'
-//   }
-
-//   const response = await axios.get(uri + "8fef2d34078659493ce161a6c7fba4b56afefa8535296a5743f6958741414441")
-//   return response.data
-// }
+function getAssetsAmount(
+  adaAmount: number,
+  assetsSummary: AssetsSummary,
+  assetsDetails: AssetsDetail[]
+) {
+  const tokenTicker: Token[] = [
+    {
+      name: "ADA",
+      amount: adaAmount,
+      decimals: 6,
+    },
+  ];
+  for (let token of assetsDetails) {
+    const { ticker, policy_id, decimals, name_hex } = token;
+    tokenTicker.push({
+      name: ticker,
+      amount: assetsSummary[policy_id][name_hex],
+      decimals: decimals,
+    });
+  }
+  return tokenTicker;
+}

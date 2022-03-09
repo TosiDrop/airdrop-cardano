@@ -7,6 +7,7 @@ const initialState: GlobalState = {
   selectedToken: {
     name: "",
     amount: 0,
+    decimals: 0,
   },
   addressArray: [],
   totalAmountToAirdrop: 0,
@@ -25,6 +26,7 @@ export const globalSlice = createSlice({
     updateSelectedToken: (state, { payload }: PayloadAction<Token>) => {
       state.selectedToken.name = payload.name;
       state.selectedToken.amount = payload.amount;
+      state.selectedToken.decimals = payload.decimals;
     },
     updateAddressArray: (
       state,

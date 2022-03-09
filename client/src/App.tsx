@@ -43,13 +43,7 @@ function App() {
         console.log(err);
       }
       const walletSummary = await getWalletSummary(api);
-      const tokenArray = Object.keys(walletSummary).map((policyId: string) => {
-        return {
-          name: policyId,
-          amount: walletSummary[policyId],
-        };
-      });
-      dispatch(updateTokenArray(tokenArray));
+      dispatch(updateTokenArray(walletSummary));
     })();
   }, [api]);
 

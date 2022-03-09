@@ -22,7 +22,10 @@ export default function TokenDetail() {
       <div className={`${COMPONENT_CLASS}__row`}>
         <span>Balance in wallet</span>
         <span>
-          {(selectedToken.amount / 1000000).toFixed(2)} {selectedToken.name}
+          {(
+            selectedToken.amount / Math.pow(10, selectedToken.decimals)
+          ).toFixed(2)}{" "}
+          {selectedToken.name}
         </span>
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
