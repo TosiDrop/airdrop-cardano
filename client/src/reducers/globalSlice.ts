@@ -30,7 +30,7 @@ export const globalSlice = createSlice({
       state.selectedToken.decimals = payload.decimals;
     },
     updateLoadingApi: (state, { payload }: PayloadAction<boolean>) => {
-      state.loadingApi = payload
+      state.loadingApi = payload;
     },
     updateAddressArray: (
       state,
@@ -50,7 +50,7 @@ export const {
   updateTokenArray,
   updateSelectedToken,
   updateAddressArray,
-  updateLoadingApi
+  updateLoadingApi,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;
