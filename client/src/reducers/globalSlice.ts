@@ -11,6 +11,7 @@ const initialState: GlobalState = {
   },
   addressArray: [],
   totalAmountToAirdrop: 0,
+  loadingApi: false,
 };
 
 export const globalSlice = createSlice({
@@ -27,6 +28,9 @@ export const globalSlice = createSlice({
       state.selectedToken.name = payload.name;
       state.selectedToken.amount = payload.amount;
       state.selectedToken.decimals = payload.decimals;
+    },
+    updateLoadingApi: (state, { payload }: PayloadAction<boolean>) => {
+      state.loadingApi = payload
     },
     updateAddressArray: (
       state,
@@ -46,6 +50,7 @@ export const {
   updateTokenArray,
   updateSelectedToken,
   updateAddressArray,
+  updateLoadingApi
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

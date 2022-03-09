@@ -10,6 +10,7 @@ export interface GlobalState {
   selectedToken: Token;
   addressArray: AddressAmount[];
   totalAmountToAirdrop: number;
+  loadingApi: boolean
 }
 
 export type API = object | undefined;

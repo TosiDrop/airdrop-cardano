@@ -1,4 +1,4 @@
-import { Button, Popover } from "@arco-design/web-react";
+import { Button, Popover, Spin } from "@arco-design/web-react";
 import ThemeSwitch from "components/Navbar/ThemeSwitch";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
@@ -19,6 +19,9 @@ export default function Navbar() {
   const [btnText, setBtnText] = useState("Connect wallet");
   const walletAddress = useSelector(
     (state: RootStateOrAny) => state.blockchain.walletAddress
+  );
+  const loadingApi = useSelector(
+    (state: RootStateOrAny) => state.global.loadingApi
   );
 
   useEffect(() => {
@@ -47,7 +50,12 @@ export default function Navbar() {
         title="Select Wallet"
         content={selectWalletBtns()}
       >
-        <Button className={EL_CLASS}>{btnText}</Button>
+        <Button className={EL_CLASS}>
+          {btnText}
+          {
+           loadingApi ? <div className="lds-dual-ring"></div> : null
+          }
+        </Button>
       </Popover>
       <img className={`${CONTAINER_CLASS}__logo`} src={Logo}></img>
     </div>

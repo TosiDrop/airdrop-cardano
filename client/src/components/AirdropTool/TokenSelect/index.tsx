@@ -7,13 +7,13 @@ import "./index.scss";
 const Option = Select.Option;
 
 export default function TokenSelect() {
-  const tokenArray = useSelector(
-    (state: RootStateOrAny) => state.global.tokenArray
+  const {tokenArray, selectedToken} = useSelector(
+    (state: RootStateOrAny) => state.global
   );
   const dispatch = useDispatch();
 
   return (
-    <Select placeholder="Select token" showSearch disabled={!tokenArray.length}>
+    <Select placeholder="Select token" showSearch disabled={!tokenArray.length} value={selectedToken.name || undefined}>
       {tokenArray.map((token: Token, index: number) => (
         <Option
           key={index}
