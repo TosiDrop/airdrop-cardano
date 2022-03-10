@@ -2,13 +2,30 @@ export interface Token {
   name: string;
   amount: number;
   decimals: number;
+  ticker: string;
+  policyId: string;
+  nameHex: string;
+}
+
+export const defaultToken = {
+  name: "",
+  amount: 0,
+  decimals: 0,
+  ticker: "",
+  policyId: "",
+  nameHex: "",
+}
+
+export interface AddressAmountMap {
+  address: string
+  amount: number
 }
 
 export interface GlobalState {
   darkTheme: boolean;
   tokenArray: Token[];
   selectedToken: Token;
-  addressArray: AddressAmount[];
+  addressArray: AddressAmountMap[];
   totalAmountToAirdrop: number;
   loadingApi: boolean;
 }
@@ -23,27 +40,4 @@ export interface BlockchainState {
 export enum WalletName {
   NAMI = "nami",
   CCVAULT = "ccvault",
-}
-
-// policy ID => asset name in hex => amount
-export interface AssetsSummary {
-  [key: string]: {
-    [key: string]: number;
-  };
-}
-
-export interface AssetsAmount {
-  [key: string]: number;
-}
-
-export interface AssetsDetail {
-  decimals: number;
-  ticker: string;
-  policy_id: string;
-  name_hex: string;
-}
-
-export interface AddressAmount {
-  address: string;
-  amount: number;
 }

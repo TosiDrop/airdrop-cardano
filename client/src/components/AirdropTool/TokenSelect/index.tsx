@@ -25,11 +25,7 @@ export default function TokenSelect() {
           value={token.name}
           onClick={() =>
             dispatch(
-              updateSelectedToken({
-                name: token.name,
-                amount: token.amount,
-                decimals: token.decimals,
-              })
+              updateSelectedToken(token)
             )
           }
         >

@@ -1,13 +1,36 @@
 import { useDispatch } from "react-redux";
 import { setApi } from "reducers/blockchainSlice";
-import { WalletName, API, AssetsSummary, Token, AssetsDetail } from "utils";
+import { WalletName, API, Token } from "utils";
 import { TransactionUnspentOutput } from "@emurgo/cardano-serialization-lib-asmjs";
 import axios from "axios";
 let Buffer = require("buffer").Buffer;
 
+/**
+ * policy ID => asset name in hex => amount 
+ */
+interface AssetAmount {
+  [key: string]: {
+    [key: string]: number
+  }
+}
+
+/**
+ * info coming from API
+ */
+interface AssetDetail {
+  decimals: number;
+  ticker: string;
+  policy_id: string;
+  name_hex: string;
+}
+
 export default function useWallet() {
   const dispatch = useDispatch();
 
+  /**
+   * enable connection to wallet
+   * @param walletName 
+   */
   const enableWallet = async (walletName: string) => {
     try {
       let API: API = undefined;
@@ -29,9 +52,14 @@ export default function useWallet() {
     }
   };
 
-  const getWalletSummary = async (API: any): Promise<Token[]> => {
+  /**
+   * get all the tokens inside the wallet
+   * @param API 
+   * @returns 
+   */
+  const getTokenArrayInWallet = async (API: any): Promise<Token[]> => {
     let adaAmount = 0;
-    let assetsSummary: AssetsSummary = {};
+    let assetsSummary: AssetAmount = {};
 
     try {
       /**
@@ -89,18 +117,18 @@ export default function useWallet() {
       console.log(err);
     }
 
-    const assetsDetails = await getAssetDetails(assetsSummary);
-    const assetsAmount = getAssetsAmount(
+    const assetDetail = await getAssetDetails(assetsSummary);
+    const assetsAmount = getCompleteTokenArray(
       adaAmount,
       assetsSummary,
-      assetsDetails
+      assetDetail
     );
     return assetsAmount;
   };
 
   return {
     enableWallet: enableWallet,
-    getWalletSummary: getWalletSummary,
+    getTokenArrayInWallet: getTokenArrayInWallet,
   };
 }
 
@@ -120,7 +148,7 @@ function convertBufferToHex(inBuffer: Uint8Array): string {
   return inString;
 }
 
-async function getAssetDetails(assetsSummary: AssetsSummary) {
+async function getAssetDetails(assetsSummary: AssetAmount) {
   const url = "https://token-registry-api.apexpool.info/api/v0/tokens";
   const tokens: { policy_id: string; token_name: string }[] = [];
   for (let policyId in assetsSummary) {
@@ -135,25 +163,31 @@ async function getAssetDetails(assetsSummary: AssetsSummary) {
   return res.data;
 }
 
-function getAssetsAmount(
+function getCompleteTokenArray(
   adaAmount: number,
-  assetsSummary: AssetsSummary,
-  assetsDetails: AssetsDetail[]
+  assetAmount: AssetAmount,
+  assetDetail: AssetDetail[]
 ) {
-  const tokenTicker: Token[] = [
+  const tokens: Token[] = [
     {
       name: "ADA",
       amount: adaAmount,
       decimals: 6,
+      ticker: "",
+      policyId: "",
+      nameHex: "",
     },
   ];
-  for (let token of assetsDetails) {
+  for (let token of assetDetail) {
     const { ticker, policy_id, decimals, name_hex } = token;
-    tokenTicker.push({
+    tokens.push({
       name: ticker,
-      amount: assetsSummary[policy_id][name_hex],
+      amount: assetAmount[policy_id][name_hex],
       decimals: decimals,
+      ticker: ticker,
+      policyId: policy_id,
+      nameHex: name_hex,
     });
   }
-  return tokenTicker;
+  return tokens;
 }

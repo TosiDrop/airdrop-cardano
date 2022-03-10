@@ -16,6 +16,7 @@ import useBackgroundImage from "hooks/useBackgroundImage";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
 import {
+  resetSelectedToken,
   updateLoadingApi,
   updateSelectedToken,
   updateTokenArray,
@@ -29,7 +30,7 @@ function App() {
   const CONTAINER_CLASS = useDualThemeClass({ main: "container", el: "" })[0];
   const dispatch = useDispatch();
   const api = useSelector((state: RootStateOrAny) => state.blockchain.api);
-  const { getWalletSummary, enableWallet } = useWallet();
+  const { getTokenArrayInWallet, enableWallet } = useWallet();
 
   useEffect(() => {
     setTimeout(() => {
@@ -50,9 +51,10 @@ function App() {
       let address = await api.getChangeAddress();
 
       /**
-       * if api changes, set walletSummary to []
+       * if api changes, set tokenArrayInWallet to []
        * so that it is locked until the new one syncs
        */
+      dispatch(resetSelectedToken())
       dispatch(updateTokenArray([]));
       dispatch(updateLoadingApi(true));
 
@@ -64,17 +66,10 @@ function App() {
       } catch (err) {
         console.log(err);
       }
-      const walletSummary = await getWalletSummary(api);
-      walletSummary.sort((a, b) => (a.name < b.name ? -1 : 1));
+      const tokenArrayInWallet = await getTokenArrayInWallet(api);
+      tokenArrayInWallet.sort((a, b) => (a.name < b.name ? -1 : 1));
 
-      dispatch(
-        updateSelectedToken({
-          name: "",
-          amount: 0,
-          decimals: 0,
-        })
-      );
-      dispatch(updateTokenArray(walletSummary));
+      dispatch(updateTokenArray(tokenArrayInWallet));
       dispatch(updateLoadingApi(false));
     })();
   }, [api]);
