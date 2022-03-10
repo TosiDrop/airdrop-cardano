@@ -23,11 +23,7 @@ export default function TokenSelect() {
         <Option
           key={index}
           value={token.name}
-          onClick={() =>
-            dispatch(
-              updateSelectedToken(token)
-            )
-          }
+          onClick={() => dispatch(updateSelectedToken(token))}
         >
           {token.name}
         </Option>

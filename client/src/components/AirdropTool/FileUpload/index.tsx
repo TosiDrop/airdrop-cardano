@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { Upload, Button } from "@arco-design/web-react";
 import { UploadItem } from "@arco-design/web-react/es/Upload";
 import { updateAddressArray } from "reducers/globalSlice";
-import { AddressAmountMap } from 'utils'
+import { AddressAmountMap } from "utils";
 import "./index.scss";
 
 export default function FileUpload() {

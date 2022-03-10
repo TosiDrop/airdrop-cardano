@@ -26,7 +26,7 @@ export const globalSlice = createSlice({
       state.selectedToken.decimals = payload.decimals;
     },
     resetSelectedToken: (state) => {
-      state.selectedToken = defaultToken
+      state.selectedToken = defaultToken;
     },
     updateLoadingApi: (state, { payload }: PayloadAction<boolean>) => {
       state.loadingApi = payload;

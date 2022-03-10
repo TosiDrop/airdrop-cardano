@@ -6,12 +6,12 @@ import axios from "axios";
 let Buffer = require("buffer").Buffer;
 
 /**
- * policy ID => asset name in hex => amount 
+ * policy ID => asset name in hex => amount
  */
 interface AssetAmount {
   [key: string]: {
-    [key: string]: number
-  }
+    [key: string]: number;
+  };
 }
 
 /**
@@ -29,7 +29,7 @@ export default function useWallet() {
 
   /**
    * enable connection to wallet
-   * @param walletName 
+   * @param walletName
    */
   const enableWallet = async (walletName: string) => {
     try {
@@ -54,8 +54,8 @@ export default function useWallet() {
 
   /**
    * get all the tokens inside the wallet
-   * @param API 
-   * @returns 
+   * @param API
+   * @returns
    */
   const getTokenArrayInWallet = async (API: any): Promise<Token[]> => {
     let adaAmount = 0;

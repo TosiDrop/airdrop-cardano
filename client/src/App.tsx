@@ -54,7 +54,7 @@ function App() {
        * if api changes, set tokenArrayInWallet to []
        * so that it is locked until the new one syncs
        */
-      dispatch(resetSelectedToken())
+      dispatch(resetSelectedToken());
       dispatch(updateTokenArray([]));
       dispatch(updateLoadingApi(true));
 

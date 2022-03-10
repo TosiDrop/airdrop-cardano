@@ -14,11 +14,11 @@ export const defaultToken = {
   ticker: "",
   policyId: "",
   nameHex: "",
-}
+};
 
 export interface AddressAmountMap {
-  address: string
-  amount: number
+  address: string;
+  amount: number;
 }
 
 export interface GlobalState {
