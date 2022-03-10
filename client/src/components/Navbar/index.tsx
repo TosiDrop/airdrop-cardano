@@ -4,7 +4,7 @@ import ThemeSwitch from "components/Navbar/ThemeSwitch";
 import { Button, Popover } from "@arco-design/web-react";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
-import { WalletName } from "utils";
+import { supportedWallets } from "utils";
 import Logo from "assets/logo.png";
 import "./index.scss";
 
@@ -33,10 +33,13 @@ export default function Navbar() {
   const selectWalletBtns = () => {
     return (
       <div className={`${CONTAINER_CLASS}__select-wallet`}>
-        <Button onClick={() => enableWallet(WalletName.NAMI)}>Nami</Button>
-        <Button onClick={() => enableWallet(WalletName.CCVAULT)}>
-          CCVault
-        </Button>
+        {supportedWallets.map((wallet) => {
+          return (
+            <Button key={wallet.name} onClick={() => enableWallet(wallet.name)}>
+              {wallet.displayName}
+            </Button>
+          );
+        })}
       </div>
     );
   };

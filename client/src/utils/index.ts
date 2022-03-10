@@ -41,3 +41,14 @@ export enum WalletName {
   NAMI = "nami",
   CCVAULT = "ccvault",
 }
+
+export const supportedWallets = [
+  {
+    name: WalletName.NAMI,
+    displayName: "Name",
+  },
+  {
+    name: WalletName.CCVAULT,
+    displayName: "CCVault",
+  },
+];

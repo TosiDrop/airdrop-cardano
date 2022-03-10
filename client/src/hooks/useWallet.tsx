@@ -135,7 +135,10 @@ export default function useWallet() {
 function parseUtxo(rawUtxo: string) {
   const utxo = TransactionUnspentOutput.from_bytes(Buffer.from(rawUtxo, "hex"));
   const output = utxo.output();
-  const amount = output.amount().coin().to_str(); // ADA amount in lovelace
+  /**
+   * Ada amount in lovelace
+   */
+  const amount = output.amount().coin().to_str();
   const multiasset = output.amount().multiasset();
   return {
     amount,
@@ -151,16 +154,24 @@ function convertBufferToHex(inBuffer: Uint8Array): string {
 async function getAssetDetails(assetsSummary: AssetAmount) {
   const url = "https://token-registry-api.apexpool.info/api/v0/tokens";
   const tokens: { policy_id: string; token_name: string }[] = [];
-  for (let policyId in assetsSummary) {
-    for (let assetName in assetsSummary[policyId]) {
-      tokens.push({
-        policy_id: policyId,
-        token_name: assetName,
-      });
+  try {
+    for (let policyId in assetsSummary) {
+      for (let assetName in assetsSummary[policyId]) {
+        tokens.push({
+          policy_id: policyId,
+          token_name: assetName,
+        });
+      }
     }
+    /**
+     * This means that the wallet has no asset other than ada
+     */
+    if (!tokens.length) return [];
+    const res = await axios.post(url, { tokens });
+    return res.data;
+  } catch (e) {
+    return [];
   }
-  const res = await axios.post(url, { tokens });
-  return res.data;
 }
 
 function getCompleteTokenArray(
