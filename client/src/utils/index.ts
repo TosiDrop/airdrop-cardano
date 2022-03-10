@@ -45,7 +45,7 @@ export enum WalletName {
 export const supportedWallets = [
   {
     name: WalletName.NAMI,
-    displayName: "Name",
+    displayName: "Nami",
   },
   {
     name: WalletName.CCVAULT,
