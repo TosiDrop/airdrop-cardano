@@ -1,8 +1,8 @@
+import { useDispatch } from "react-redux";
 import { Switch } from "@arco-design/web-react";
 import { IconSun, IconMoon } from "@arco-design/web-react/icon";
-import { useDispatch } from "react-redux";
-import { toggleTheme } from "reducers/globalSlice";
 import useDualThemeClass from "hooks/useDualThemeClass";
+import { toggleTheme } from "reducers/globalSlice";
 import "./index.scss";
 
 export default function ThemeSwitch() {

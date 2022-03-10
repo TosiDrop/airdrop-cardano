@@ -1,10 +1,20 @@
-import "App.scss";
-import useBackgroundImage from "hooks/useBackgroundImage";
+/**
+ * import order:
+ * - react
+ * - component
+ * - hook
+ * - reducers
+ * - others
+ * - css
+ */
+
+import { useEffect } from "react";
+import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import Navbar from "components/Navbar";
 import AirdropTool from "components/AirdropTool";
+import useBackgroundImage from "hooks/useBackgroundImage";
 import useDualThemeClass from "hooks/useDualThemeClass";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
+import useWallet from "hooks/useWallet";
 import {
   updateLoadingApi,
   updateSelectedToken,
@@ -13,13 +23,12 @@ import {
 import { setWalletAddress } from "reducers/blockchainSlice";
 import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
 import { Buffer } from "buffer";
-import useWallet from "hooks/useWallet";
+import "App.scss";
 
 function App() {
-  const [loading, setLoading] = useState(false);
   const CONTAINER_CLASS = useDualThemeClass({ main: "container", el: "" })[0];
-  const api = useSelector((state: RootStateOrAny) => state.blockchain.api);
   const dispatch = useDispatch();
+  const api = useSelector((state: RootStateOrAny) => state.blockchain.api);
   const { getWalletSummary, enableWallet } = useWallet();
 
   useEffect(() => {
@@ -74,7 +83,6 @@ function App() {
     <div className="App" style={useBackgroundImage()}>
       <div className={CONTAINER_CLASS}>
         <Navbar></Navbar>
-        {loading ? "Loading assets..." : null}
         <AirdropTool></AirdropTool>
       </div>
     </div>

@@ -1,7 +1,6 @@
-import { Button, InputNumber } from "@arco-design/web-react";
-import { IconSend } from "@arco-design/web-react/icon";
-import { useState } from "react";
 import { useSelector, RootStateOrAny } from "react-redux";
+import { Button } from "@arco-design/web-react";
+import { IconSend } from "@arco-design/web-react/icon";
 import "./index.scss";
 
 const COMPONENT_CLASS = "token-detail";

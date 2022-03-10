@@ -1,9 +1,9 @@
-import { Button, Popover, Spin } from "@arco-design/web-react";
-import ThemeSwitch from "components/Navbar/ThemeSwitch";
-import useDualThemeClass from "hooks/useDualThemeClass";
-import useWallet from "hooks/useWallet";
 import { useEffect, useState } from "react";
 import { RootStateOrAny, useSelector } from "react-redux";
+import ThemeSwitch from "components/Navbar/ThemeSwitch";
+import { Button, Popover } from "@arco-design/web-react";
+import useDualThemeClass from "hooks/useDualThemeClass";
+import useWallet from "hooks/useWallet";
 import { WalletName } from "utils";
 import Logo from "assets/logo.png";
 import "./index.scss";

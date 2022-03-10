@@ -1,4 +1,4 @@
-import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import globalReducer from "./reducers/globalSlice";
 import blockchainReducer from "./reducers/blockchainSlice";
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
+import { useDispatch } from "react-redux";
 import { Upload, Button } from "@arco-design/web-react";
 import { UploadItem } from "@arco-design/web-react/es/Upload";
-import { useDispatch } from "react-redux";
 import { updateAddressArray } from "reducers/globalSlice";
 import { AddressAmount } from "utils";
 import "./index.scss";

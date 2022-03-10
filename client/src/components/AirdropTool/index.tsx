@@ -1,8 +1,8 @@
 import TokenSelect from "./TokenSelect";
 import TokenDetail from "./TokenDetail";
-import useDualThemeClass from "hooks/useDualThemeClass";
 import FileUpload from "./FileUpload";
 import AddressList from "./AddressList";
+import useDualThemeClass from "hooks/useDualThemeClass";
 import "./index.scss";
 
 const COMPONENT_CLASS = "airdrop-tool";
