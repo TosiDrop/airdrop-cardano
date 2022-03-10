@@ -55,7 +55,7 @@ export default function Navbar() {
           {loadingApi ? <div className="lds-dual-ring"></div> : null}
         </Button>
       </Popover>
-      <img className={`${CONTAINER_CLASS}__logo`} src={Logo}></img>
+      <img className={`${CONTAINER_CLASS}__logo`} src={Logo} alt="logo"></img>
     </div>
   );
 }
