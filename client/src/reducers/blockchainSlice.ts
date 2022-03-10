@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { BlockchainState, WalletName } from "utils";
+import { BlockchainState } from "utils";
 
 const initialState: BlockchainState = {
   api: undefined,
