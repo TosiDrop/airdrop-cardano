@@ -1,13 +1,3 @@
-/**
- * import order:
- * - react
- * - component
- * - hook
- * - reducers
- * - others
- * - css
- */
-
 import { useEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import Navbar from "components/Navbar";
@@ -18,7 +8,6 @@ import useWallet from "hooks/useWallet";
 import {
   resetSelectedToken,
   updateLoadingApi,
-  updateSelectedToken,
   updateTokenArray,
 } from "reducers/globalSlice";
 import { setWalletAddress } from "reducers/blockchainSlice";
@@ -33,13 +22,16 @@ function App() {
   const { getTokenArrayInWallet, enableWallet } = useWallet();
 
   useEffect(() => {
+    /**
+     * Use setTimeout so window can load first
+     */
     setTimeout(() => {
       const selectedWallet = localStorage.getItem("wallet");
       if (selectedWallet) {
         enableWallet(selectedWallet);
       }
     }, 500);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     /**
@@ -72,7 +64,7 @@ function App() {
       dispatch(updateTokenArray(tokenArrayInWallet));
       dispatch(updateLoadingApi(false));
     })();
-  }, [api]);
+  }, [api]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="App" style={useBackgroundImage()}>
