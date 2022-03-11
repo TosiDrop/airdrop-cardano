@@ -11,8 +11,6 @@ body,
 }
 
 :root {
-  --dark-theme-bg-color: black;
-  --light-theme-bg-color: white;
   --dt-color: #ffffff;
   --lt-color: #143544;
   --std-box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
@@ -22,4 +20,6 @@ body,
   --std-separator-width-half: 5px;
   --dt-btn-color: linear-gradient(to right, #a1ffce, #faffd1);
   --lt-btn-color: linear-gradient(to right, #4b79a1, #283e51);
+  --dt-bg-color: linear-gradient(to right, #4b79a1, #283e51);
+  --lt-bg-color: linear-gradient(to right, #a1ffce, #faffd1);
 }

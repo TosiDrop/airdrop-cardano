@@ -1,7 +1,10 @@
 import { useSelector, RootStateOrAny } from "react-redux";
+import PopUp from "components/AirdropTool/PopUp";
 import { Button } from "@arco-design/web-react";
 import { IconSend } from "@arco-design/web-react/icon";
 import "./index.scss";
+import { useState } from "react";
+import { PopUpType } from "utils";
 
 const COMPONENT_CLASS = "token-detail";
 
@@ -10,10 +13,30 @@ export default function TokenDetail() {
     (state: RootStateOrAny) => state.global
   );
 
+  const [popUpProps, setPopUpProps] = useState({
+    show: false,
+    type: PopUpType.LOADING,
+    text: "",
+  });
+
   const addressArrayLength = addressArray.length;
 
   const sendToken = () => {
-    console.log(`Sending ${totalAmountToAirdrop} ${selectedToken.name}...`);
+    /**
+     * Check then send tokens
+     */
+    setPopUpProps({
+      show: true,
+      type: PopUpType.LOADING,
+      text: `Sending ${totalAmountToAirdrop} ${selectedToken.name}`,
+    });
+    setTimeout(() => {
+      setPopUpProps({
+        show: false,
+        type: PopUpType.LOADING,
+        text: "",
+      });
+    }, 5000);
   };
 
   return (
@@ -50,6 +73,16 @@ export default function TokenDetail() {
           <IconSend />
         </Button>
       </div>
+      <PopUp
+        {...popUpProps}
+        closePopUp={() =>
+          setPopUpProps({
+            show: false,
+            type: PopUpType.LOADING,
+            text: "",
+          })
+        }
+      ></PopUp>
     </div>
   );
 }

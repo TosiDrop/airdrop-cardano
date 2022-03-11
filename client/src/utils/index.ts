@@ -52,3 +52,16 @@ export const supportedWallets = [
     displayName: "CCVault",
   },
 ];
+
+export enum PopUpType {
+  LOADING = "loading",
+  SUCCESS = "success",
+  FAIL = "fail",
+}
+
+export interface PopUpProps {
+  show: boolean;
+  type: PopUpType;
+  text: string;
+  closePopUp: Function;
+}
