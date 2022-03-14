@@ -65,3 +65,7 @@ export interface PopUpProps {
   text: string;
   closePopUp: Function;
 }
+
+export function shortenAddress(addr: string) {
+  return `${addr.slice(0, 6)}...${addr.slice(addr.length - 8)}`;
+}

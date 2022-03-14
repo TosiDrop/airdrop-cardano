@@ -4,7 +4,7 @@ import ThemeSwitch from "components/Navbar/ThemeSwitch";
 import { Button, Popover } from "@arco-design/web-react";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
-import { supportedWallets } from "utils";
+import { supportedWallets, shortenAddress } from "utils";
 import Logo from "assets/logo.png";
 import "./index.scss";
 
@@ -26,7 +26,7 @@ export default function Navbar() {
 
   useEffect(() => {
     if (walletAddress) {
-      setBtnText(`addr1...${walletAddress.slice(walletAddress.length - 8)}`);
+      setBtnText(shortenAddress(walletAddress));
     }
   }, [walletAddress]);
 
