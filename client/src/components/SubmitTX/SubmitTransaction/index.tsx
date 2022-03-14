@@ -36,9 +36,12 @@ export default function SubmitTransaction() {
         tx.body(),
         transactionWitnessSet
     );
+    // convert array to hex string
+    const hexSigned = (Buffer.from(signedTx.to_bytes(), "utf8").toString("hex"));
+    console.log (hexSigned);
     //submit transaction
-    const submittedTxHash =  await api.submitTx(Buffer.from(signedTx.to_bytes(), "utf8").toString("hex"));
-    window.alert("submitted, hash = "+ submittedTxHash)
+    //const submittedTxHash =  await api.submitTx(Buffer.from(signedTx.to_bytes(), "utf8").toString("hex"));
+    //window.alert("submitted, hash = "+ submittedTxHash)
     
 
     
