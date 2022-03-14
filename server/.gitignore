@@ -1,0 +1,7 @@
+files
+db
+transactions
+*wallet*
+.idea
+.vscode
+__pycache__

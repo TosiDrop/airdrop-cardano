@@ -1,0 +1,5 @@
+PyYAML
+requests
+Flask
+flask_restx
+werkzeug
