@@ -66,6 +66,15 @@ export interface PopUpProps {
   closePopUp: Function;
 }
 
+export interface AirdropRequestBody {
+  source_addresses: string[];
+  change_address?: string;
+  token_name: string;
+  addresses: {
+    [key: string]: number;
+  }[];
+}
+
 export function shortenAddress(addr: string) {
   return `${addr.slice(0, 6)}...${addr.slice(addr.length - 8)}`;
 }

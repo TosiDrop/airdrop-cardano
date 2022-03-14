@@ -4,13 +4,16 @@ import { Button } from "@arco-design/web-react";
 import { IconSend } from "@arco-design/web-react/icon";
 import "./index.scss";
 import { useState } from "react";
-import { PopUpType } from "utils";
+import { AddressAmountMap, AirdropRequestBody, PopUpType, Token } from "utils";
 
 const COMPONENT_CLASS = "token-detail";
 
 export default function TokenDetail() {
   const { selectedToken, addressArray, totalAmountToAirdrop } = useSelector(
     (state: RootStateOrAny) => state.global
+  );
+  const { walletAddress } = useSelector(
+    (state: RootStateOrAny) => state.blockchain
   );
 
   const [popUpProps, setPopUpProps] = useState({
@@ -37,6 +40,8 @@ export default function TokenDetail() {
       });
       return;
     }
+
+    const requestBody = prepareBody(walletAddress, selectedToken, addressArray);
 
     setPopUpProps({
       show: true,
@@ -102,4 +107,19 @@ export default function TokenDetail() {
       ></PopUp>
     </div>
   );
+}
+
+function prepareBody(
+  walletAddress: string,
+  selectedToken: Token,
+  addressArray: AddressAmountMap[]
+) {
+  const body: AirdropRequestBody = {
+    source_addresses: [walletAddress],
+    token_name: `${selectedToken.policyId}.${selectedToken.nameHex}`,
+    addresses: addressArray.map((addr: AddressAmountMap) => ({
+      [addr.address]: addr.amount * Math.pow(10, selectedToken.decimals),
+    })),
+  };
+  return body
 }

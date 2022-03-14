@@ -13,7 +13,9 @@ export default function AddressList() {
       <div className={`${COMPONENT_CLASS}__list`}>
         {addressArray.map(
           ({ address, amount }: AddressAmountMap, i: number) => (
-            <div key={i}>{`${shortenAddress(address)}: ${amount}`}</div>
+            <div key={i}>{`${shortenAddress(address)}: ${amount.toFixed(
+              2
+            )}`}</div>
           )
         )}
       </div>

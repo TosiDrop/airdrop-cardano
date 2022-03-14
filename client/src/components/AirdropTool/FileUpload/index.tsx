@@ -52,7 +52,7 @@ function splitAmountArray(addressAmountParsed: string[]): AddressAmountMap[] {
     temp = addressAmountInfo.split(",");
     res.push({
       address: temp[0],
-      amount: Number(Number(temp[1]).toFixed(2)),
+      amount: Number(Number(temp[1])),
     });
   }
   return res;
