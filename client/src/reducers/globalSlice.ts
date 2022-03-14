@@ -21,9 +21,7 @@ export const globalSlice = createSlice({
       state.tokenArray = payload;
     },
     updateSelectedToken: (state, { payload }: PayloadAction<Token>) => {
-      state.selectedToken.name = payload.name;
-      state.selectedToken.amount = payload.amount;
-      state.selectedToken.decimals = payload.decimals;
+      state.selectedToken = { ...payload };
     },
     resetSelectedToken: (state) => {
       state.selectedToken = defaultToken;
