@@ -25,16 +25,33 @@ export default function TokenDetail() {
     /**
      * Check then send tokens
      */
+
+    if (
+      selectedToken.amount <
+      totalAmountToAirdrop * Math.pow(10, selectedToken.decimals)
+    ) {
+      setPopUpProps({
+        show: true,
+        type: PopUpType.FAIL,
+        text: "Balance in wallet is not enough",
+      });
+      return;
+    }
+
     setPopUpProps({
       show: true,
       type: PopUpType.LOADING,
       text: `Sending ${totalAmountToAirdrop} ${selectedToken.name}`,
     });
+
+    /**
+     * axios happens here
+     */
     setTimeout(() => {
       setPopUpProps({
-        show: false,
-        type: PopUpType.LOADING,
-        text: "",
+        show: true,
+        type: PopUpType.SUCCESS,
+        text: "Airdrop successful",
       });
     }, 5000);
   };

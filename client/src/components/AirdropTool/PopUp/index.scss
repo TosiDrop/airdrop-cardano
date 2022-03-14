@@ -11,28 +11,41 @@
 }
 
 .popup {
-  padding: calc(3 * var(--std-separator-width));
+  padding: calc(2 * var(--std-separator-width));
+  max-width: 300px;
+  text-align: center;
   border-radius: var(--border-radius-small);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  h1 {
+  h2 {
     margin: 0;
+    background-clip: text;
   }
 
-  &__logo {
+  &__symbol {
     margin: calc(2 * var(--std-separator-width)) 0;
     width: 100px;
+  }
+
+  &__symbol-success {
+    font-size: 5rem;
+    color: #579973 !important;
+  }
+
+  &__symbol-fail {
+    font-size: 5rem;
+    color: #d15f5f !important;
   }
 
   &__btn {
     width: 100%;
   }
 
-  &__logo-loading {
-    animation: logo-loading 1s infinite;
+  &__symbol-loading {
+    animation: symbol-loading 1s infinite;
   }
 
   &-dark {
@@ -44,7 +57,7 @@
   }
 }
 
-@keyframes logo-loading {
+@keyframes symbol-loading {
   0% {
     transform: rotateZ(0deg);
   }
