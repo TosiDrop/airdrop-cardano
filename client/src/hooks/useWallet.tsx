@@ -58,7 +58,7 @@ export default function useWallet() {
    * @returns
    */
   const getTokenArrayInWallet = async (API: any): Promise<Token[]> => {
-    let adaAmount = 0;
+    // let adaAmount = 0;
     let assetsSummary: AssetAmount = {};
 
     try {
@@ -68,9 +68,11 @@ export default function useWallet() {
        */
       const rawUtxos: string[] = await API.getUtxos();
 
+      console.log(rawUtxos);
+
       for (const rawUtxo of rawUtxos) {
-        const { amount, multiasset } = parseUtxo(rawUtxo);
-        adaAmount += Number(amount);
+        const { multiasset } = parseUtxo(rawUtxo);
+        // adaAmount += Number(amount);
 
         if (multiasset) {
           /**
@@ -148,7 +150,8 @@ function convertBufferToHex(inBuffer: Uint8Array): string {
 }
 
 async function getAssetDetails(assetsSummary: AssetAmount) {
-  const url = "https://token-registry-api.apexpool.info/api/v0/tokens";
+  const url = process.env.REACT_APP_API;
+  if (!url) return [];
   const tokens: { policy_id: string; token_name: string }[] = [];
   try {
     for (let policyId in assetsSummary) {
@@ -163,10 +166,26 @@ async function getAssetDetails(assetsSummary: AssetAmount) {
      * This means that the wallet has no asset other than ada
      */
     if (!tokens.length) return [];
+    console.log(tokens);
     const res = await axios.post(url, { tokens });
     return res.data;
-  } catch (e) {
-    return [];
+  } catch (e: any) {
+    // const statusCode = e.response.data
+    switch (e.response.status) {
+      case 406:
+        const defaultTokenDetails = [];
+        for (let token of tokens) {
+          defaultTokenDetails.push({
+            decimals: 1,
+            ticker: Buffer.from(token.token_name, "hex").toString(),
+            policy_id: token.policy_id,
+            name_hex: token.token_name,
+          });
+        }
+        return defaultTokenDetails;
+      default:
+        return [];
+    }
   }
 }
 
