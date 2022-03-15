@@ -148,7 +148,7 @@ function convertBufferToHex(inBuffer: Uint8Array): string {
 }
 
 async function getAssetDetails(assetsSummary: AssetAmount) {
-  const url = process.env.REACT_APP_API;
+  const url = process.env.REACT_APP_API_REGISTRY + '/api/v0/tokens';
   if (!url) return [];
   const tokens: { policy_id: string; token_name: string }[] = [];
   try {
@@ -172,7 +172,7 @@ async function getAssetDetails(assetsSummary: AssetAmount) {
         const defaultTokenDetails = [];
         for (let token of tokens) {
           defaultTokenDetails.push({
-            decimals: 1,
+            decimals: 0,
             ticker: Buffer.from(token.token_name, "hex").toString(),
             policy_id: token.policy_id,
             name_hex: token.token_name,
