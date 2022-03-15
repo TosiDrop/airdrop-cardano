@@ -45,8 +45,8 @@ app.config['DEBUG'] = True
 app.config['UPLOAD_FOLDER'] = FILES_PATH
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
-api = Api(app, version='0.1', title='FreeDropz API', description='A simple API for FreeDropz',)
-ns = api.namespace('api/v0', description='Airdrop operations')
+api = Api(app, version='0.1', title='Tosidrop API', description='A simple API for tosidrop',)
+ns = api.namespace('api/v0', description='Tosidrop api v0')
 
 airdrop_parser = reqparse.RequestParser()
 airdrop_parser.add_argument('airdrop_file', type=FileStorage, location=FILES_PATH, required=True)
