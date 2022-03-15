@@ -80,7 +80,7 @@ export default function TokenDetail() {
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
         <span>Fee</span>
-        <span>0.3 ADA</span>
+        <span>0 ADA</span>
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
         <Button
@@ -121,5 +121,5 @@ function prepareBody(
       [addr.address]: addr.amount * Math.pow(10, selectedToken.decimals),
     })),
   };
-  return body
+  return body;
 }

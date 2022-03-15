@@ -118,11 +118,7 @@ export default function useWallet() {
     }
 
     const assetDetail = await getAssetDetails(assetsSummary);
-    const assetsAmount = getCompleteTokenArray(
-      adaAmount,
-      assetsSummary,
-      assetDetail
-    );
+    const assetsAmount = getCompleteTokenArray(assetsSummary, assetDetail);
     return assetsAmount;
   };
 
@@ -175,20 +171,10 @@ async function getAssetDetails(assetsSummary: AssetAmount) {
 }
 
 function getCompleteTokenArray(
-  adaAmount: number,
   assetAmount: AssetAmount,
   assetDetail: AssetDetail[]
 ) {
-  const tokens: Token[] = [
-    {
-      name: "ADA",
-      amount: adaAmount,
-      decimals: 6,
-      ticker: "",
-      policyId: "",
-      nameHex: "",
-    },
-  ];
+  const tokens: Token[] = [];
   for (let token of assetDetail) {
     const { ticker, policy_id, decimals, name_hex } = token;
     tokens.push({
