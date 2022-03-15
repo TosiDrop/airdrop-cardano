@@ -68,8 +68,6 @@ export default function useWallet() {
        */
       const rawUtxos: string[] = await API.getUtxos();
 
-      console.log(rawUtxos);
-
       for (const rawUtxo of rawUtxos) {
         const { multiasset } = parseUtxo(rawUtxo);
         // adaAmount += Number(amount);
@@ -166,11 +164,9 @@ async function getAssetDetails(assetsSummary: AssetAmount) {
      * This means that the wallet has no asset other than ada
      */
     if (!tokens.length) return [];
-    console.log(tokens);
     const res = await axios.post(url, { tokens });
     return res.data;
   } catch (e: any) {
-    // const statusCode = e.response.data
     switch (e.response.status) {
       case 406:
         const defaultTokenDetails = [];
