@@ -1,7 +1,10 @@
 import { useDispatch } from "react-redux";
-import { setApi } from "reducers/globalSlice";
 import {
-  Token,
+  setAddressArrayContainingAda,
+  setTokenArray,
+  setApi,
+} from "reducers/globalSlice";
+import {
   AddressAmount,
   PolicyIDAndAssetNameToAddressAmountMap,
   PolicyIDAndAssetNameToAmountMap,
@@ -37,7 +40,7 @@ export default function useWallet() {
    * @param API
    * @returns
    */
-  const getTokenArrayInWallet = async (API: any): Promise<Token[]> => {
+  const getTokenArrayInWallet = async (API: any): Promise<void> => {
     try {
       /**
        * Only fetch usable UTXOs
@@ -115,11 +118,11 @@ export default function useWallet() {
         assetAddresses,
         assetDetail
       );
-      console.log(tokenArray);
-      return tokenArray;
+      tokenArray.sort((a, b) => (a.name < b.name ? -1 : 1));
+      dispatch(setAddressArrayContainingAda(addressContainingAda));
+      dispatch(setTokenArray(tokenArray));
     } catch (err) {
       console.log(err);
-      return [];
     }
   };
 

@@ -20,28 +20,25 @@ export const globalSlice = createSlice({
     toggleTheme: (state) => {
       state.darkTheme = !state.darkTheme;
     },
-    updateTokenArray: (state, { payload }: PayloadAction<Token[]>) => {
+    setTokenArray: (state, { payload }: PayloadAction<Token[]>) => {
       state.tokenArray = payload;
     },
-    updateSelectedToken: (state, { payload }: PayloadAction<Token>) => {
+    setSelectedToken: (state, { payload }: PayloadAction<Token>) => {
       state.selectedToken = { ...payload };
     },
     resetSelectedToken: (state) => {
       state.selectedToken = defaultToken;
     },
-    updateLoadingApi: (state, { payload }: PayloadAction<boolean>) => {
+    setLoadingApi: (state, { payload }: PayloadAction<boolean>) => {
       state.loadingApi = payload;
     },
-    updateAdaAddressArray: (
+    setAddressArrayContainingAda: (
       state,
       { payload }: PayloadAction<AddressAmount[]>
     ) => {
       state.addressContainingAda = payload;
     },
-    updateAddressArray: (
-      state,
-      { payload }: PayloadAction<AddressAmount[]>
-    ) => {
+    setAddressArray: (state, { payload }: PayloadAction<AddressAmount[]>) => {
       state.addressArray = payload;
       state.totalAmountToAirdrop = payload.reduce(
         (sum, item) => (sum += item.amount),
@@ -59,13 +56,14 @@ export const globalSlice = createSlice({
 
 export const {
   toggleTheme,
-  updateTokenArray,
-  updateSelectedToken,
-  updateAddressArray,
-  updateLoadingApi,
   resetSelectedToken,
+  setTokenArray,
+  setSelectedToken,
+  setAddressArray,
+  setLoadingApi,
   setApi,
   setWalletAddress,
+  setAddressArrayContainingAda,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

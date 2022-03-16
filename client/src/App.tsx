@@ -7,8 +7,8 @@ import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
 import {
   resetSelectedToken,
-  updateLoadingApi,
-  updateTokenArray,
+  setLoadingApi,
+  setTokenArray,
 } from "reducers/globalSlice";
 import { setWalletAddress } from "reducers/globalSlice";
 import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
@@ -54,8 +54,8 @@ function App() {
        * so that it is locked until the new one syncs
        */
       dispatch(resetSelectedToken());
-      dispatch(updateTokenArray([]));
-      dispatch(updateLoadingApi(true));
+      dispatch(setTokenArray([]));
+      dispatch(setLoadingApi(true));
 
       try {
         address = Address.from_bytes(Buffer.from(address, "hex")).to_bech32();
@@ -65,11 +65,9 @@ function App() {
       } catch (err) {
         console.log(err);
       }
-      const tokenArrayInWallet = await getTokenArrayInWallet(api);
-      tokenArrayInWallet.sort((a, b) => (a.name < b.name ? -1 : 1));
 
-      dispatch(updateTokenArray(tokenArrayInWallet));
-      dispatch(updateLoadingApi(false));
+      await getTokenArrayInWallet(api);
+      dispatch(setLoadingApi(false));
     })();
   }, [api]); // eslint-disable-line react-hooks/exhaustive-deps
 
