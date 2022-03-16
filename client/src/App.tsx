@@ -23,14 +23,21 @@ function App() {
 
   useEffect(() => {
     /**
-     * Use setTimeout so window can load first
+     * Use setInterval so we can retry if wallet
+     * does not want to connect
      */
-    setTimeout(() => {
-      const selectedWallet = localStorage.getItem("wallet");
-      if (selectedWallet) {
-        enableWallet(selectedWallet);
+    const enableWalletInterval = setInterval(() => {
+      try {
+        const selectedWallet = localStorage.getItem("wallet");
+        if (selectedWallet) {
+          enableWallet(selectedWallet);
+        }
+        console.log('wallet connected')
+        clearInterval(enableWalletInterval)
+      } catch (e) {
+        console.log('wallet not ready')
       }
-    }, 500);
+    }, 100)
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
