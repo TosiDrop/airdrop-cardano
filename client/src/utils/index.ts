@@ -5,6 +5,10 @@ export interface Token {
   ticker: string;
   policyId: string;
   nameHex: string;
+  addressesContainingToken: {
+    address: string,
+    amount: number
+  }[];
 }
 
 export const defaultToken = {
@@ -14,27 +18,29 @@ export const defaultToken = {
   ticker: "",
   policyId: "",
   nameHex: "",
+  addressesContainingToken: []
 };
+
+/**
+ * This one is for airdrop destination
+ */
 
 export interface AddressAmountMap {
   address: string;
   amount: number;
 }
 
+export type API = object | undefined;
+
 export interface GlobalState {
+  api: API;
+  walletAddress: string;
   darkTheme: boolean;
   tokenArray: Token[];
   selectedToken: Token;
   addressArray: AddressAmountMap[];
   totalAmountToAirdrop: number;
   loadingApi: boolean;
-}
-
-export type API = object | undefined;
-
-export interface BlockchainState {
-  api: API;
-  walletAddress: string;
 }
 
 export enum WalletName {

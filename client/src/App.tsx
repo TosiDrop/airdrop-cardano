@@ -10,7 +10,7 @@ import {
   updateLoadingApi,
   updateTokenArray,
 } from "reducers/globalSlice";
-import { setWalletAddress } from "reducers/blockchainSlice";
+import { setWalletAddress } from "reducers/globalSlice";
 import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
 import { Buffer } from "buffer";
 import "App.scss";
@@ -18,7 +18,7 @@ import "App.scss";
 function App() {
   const CONTAINER_CLASS = useDualThemeClass({ main: "container", el: "" })[0];
   const dispatch = useDispatch();
-  const api = useSelector((state: RootStateOrAny) => state.blockchain.api);
+  const api = useSelector((state: RootStateOrAny) => state.global.api);
   const { getTokenArrayInWallet, enableWallet } = useWallet();
 
   useEffect(() => {

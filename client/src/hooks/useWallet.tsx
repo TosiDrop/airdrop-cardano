@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux";
-import { setApi } from "reducers/blockchainSlice";
+import { setApi } from "reducers/globalSlice";
 import { WalletName, API, Token } from "utils";
 import { TransactionUnspentOutput } from "@emurgo/cardano-serialization-lib-asmjs";
 import axios from "axios";
@@ -69,7 +69,7 @@ export default function useWallet() {
       const rawUtxos: string[] = await API.getUtxos();
 
       for (const rawUtxo of rawUtxos) {
-        const { multiasset } = parseUtxo(rawUtxo);
+        const { multiasset, address } = parseUtxo(rawUtxo);
         // adaAmount += Number(amount);
 
         if (multiasset) {
@@ -134,11 +134,13 @@ function parseUtxo(rawUtxo: string) {
   /**
    * Ada amount in lovelace
    */
+  const address = output.address().to_bech32()
   const amount = output.amount().coin().to_str();
   const multiasset = output.amount().multiasset();
   return {
     amount,
     multiasset,
+    address
   };
 }
 
@@ -199,6 +201,7 @@ function getCompleteTokenArray(
       ticker: ticker,
       policyId: policy_id,
       nameHex: name_hex,
+      addressesContainingToken: []
     });
   }
   return tokens;

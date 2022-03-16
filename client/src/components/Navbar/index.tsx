@@ -18,7 +18,7 @@ export default function Navbar() {
   const { enableWallet } = useWallet();
   const [btnText, setBtnText] = useState("Connect wallet");
   const walletAddress = useSelector(
-    (state: RootStateOrAny) => state.blockchain.walletAddress
+    (state: RootStateOrAny) => state.global.walletAddress
   );
   const loadingApi = useSelector(
     (state: RootStateOrAny) => state.global.loadingApi

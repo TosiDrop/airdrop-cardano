@@ -25,7 +25,7 @@ export default function AirdropTool() {
   );
 
   const { walletAddress } = useSelector(
-    (state: RootStateOrAny) => state.blockchain
+    (state: RootStateOrAny) => state.global
   );
 
   const [popUpProps, setPopUpProps] = useState({
@@ -45,7 +45,10 @@ export default function AirdropTool() {
     const url = process.env.REACT_APP_API_TX;
 
     try {
-      await axios.post(`${url}/api/v0/validate`, requestBody)
+      const txData = await axios.post(`${url}/api/v0/validate`, requestBody)
+      /**
+       * TODO: get estimated total fee
+       */
       setPopUpProps({
         show: true,
         type: PopUpType.LOADING,

@@ -2,6 +2,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Token, GlobalState, AddressAmountMap, defaultToken } from "utils";
 
 const initialState: GlobalState = {
+  api: undefined,
+  walletAddress: "",
   darkTheme: false,
   tokenArray: [],
   selectedToken: defaultToken,
@@ -39,6 +41,12 @@ export const globalSlice = createSlice({
         0
       );
     },
+    setApi: (state, { payload }: PayloadAction<Object | undefined>) => {
+      state.api = payload;
+    },
+    setWalletAddress: (state, { payload }: PayloadAction<string>) => {
+      state.walletAddress = payload;
+    },
   },
 });
 
@@ -49,6 +57,8 @@ export const {
   updateAddressArray,
   updateLoadingApi,
   resetSelectedToken,
+  setApi, 
+  setWalletAddress,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;
