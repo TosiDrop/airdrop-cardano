@@ -32,12 +32,12 @@ function App() {
         if (selectedWallet) {
           enableWallet(selectedWallet);
         }
-        console.log('wallet connected')
-        clearInterval(enableWalletInterval)
+        console.log("wallet connected");
+        clearInterval(enableWalletInterval);
       } catch (e) {
-        console.log('wallet not ready')
+        console.log("wallet not ready");
       }
-    }, 100)
+    }, 100);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

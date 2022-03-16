@@ -4,7 +4,7 @@
  * type
  */
 
-export interface AddressAmountMap {
+export interface AddressAmount {
   address: string;
   amount: number;
 }
@@ -16,7 +16,7 @@ export interface Token {
   ticker: string;
   policyId: string;
   nameHex: string;
-  addressContainingToken: AddressAmountMap[];
+  addressContainingToken: AddressAmount[];
 }
 
 export interface GlobalState {
@@ -25,8 +25,8 @@ export interface GlobalState {
   darkTheme: boolean;
   tokenArray: Token[];
   selectedToken: Token;
-  addressArray: AddressAmountMap[];
-  addressContainingAda: AddressAmountMap[]
+  addressArray: AddressAmount[];
+  addressContainingAda: AddressAmount[];
   totalAmountToAirdrop: number;
   loadingApi: boolean;
 }
@@ -47,6 +47,31 @@ export interface AirdropRequestBody {
   }[];
 }
 
+/**
+ * policy ID => asset name in hex => amount
+ */
+export interface PolicyIDAndAssetNameToAmountMap {
+  [key: PolicyID]: {
+    [key: AssetName]: number;
+  };
+}
+
+/**
+ * policy ID => asset name in hex => { address, amount }
+ */
+export interface PolicyIDAndAssetNameToAddressAmountMap {
+  [key: PolicyID]: {
+    [key: AssetName]: AddressAmount[];
+  };
+}
+
+export interface AssetDetailFromAPI {
+  decimals: number;
+  ticker: string;
+  policy_id: string;
+  name_hex: string;
+}
+
 export enum PopUpType {
   LOADING = "loading",
   SUCCESS = "success",
@@ -59,3 +84,5 @@ export enum WalletName {
 }
 
 export type API = object | undefined;
+export type PolicyID = string;
+export type AssetName = string;

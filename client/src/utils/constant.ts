@@ -1,4 +1,4 @@
-import { WalletName } from './index'
+import { WalletName } from "./index";
 
 export const supportedWallets = [
   {
@@ -18,5 +18,5 @@ export const defaultToken = {
   ticker: "",
   policyId: "",
   nameHex: "",
-  addressContainingToken: []
+  addressContainingToken: [],
 };

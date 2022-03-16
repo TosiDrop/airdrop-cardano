@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Token, GlobalState, AddressAmountMap, defaultToken } from "utils";
+import { Token, GlobalState, AddressAmount, defaultToken } from "utils";
 
 const initialState: GlobalState = {
   api: undefined,
@@ -10,6 +10,7 @@ const initialState: GlobalState = {
   addressArray: [],
   totalAmountToAirdrop: 0,
   loadingApi: false,
+  addressContainingAda: [],
 };
 
 export const globalSlice = createSlice({
@@ -31,9 +32,15 @@ export const globalSlice = createSlice({
     updateLoadingApi: (state, { payload }: PayloadAction<boolean>) => {
       state.loadingApi = payload;
     },
+    updateAdaAddressArray: (
+      state,
+      { payload }: PayloadAction<AddressAmount[]>
+    ) => {
+      state.addressContainingAda = payload;
+    },
     updateAddressArray: (
       state,
-      { payload }: PayloadAction<AddressAmountMap[]>
+      { payload }: PayloadAction<AddressAmount[]>
     ) => {
       state.addressArray = payload;
       state.totalAmountToAirdrop = payload.reduce(
@@ -57,7 +64,7 @@ export const {
   updateAddressArray,
   updateLoadingApi,
   resetSelectedToken,
-  setApi, 
+  setApi,
   setWalletAddress,
 } = globalSlice.actions;
 

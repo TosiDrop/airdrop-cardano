@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { Upload, Button } from "@arco-design/web-react";
 import { UploadItem } from "@arco-design/web-react/es/Upload";
 import { updateAddressArray } from "reducers/globalSlice";
-import { AddressAmountMap } from "utils";
+import { AddressAmount } from "utils";
 import "./index.scss";
 
 export default function FileUpload() {
@@ -45,8 +45,8 @@ function csvToArray(csv: string): string[] {
   return parsedCsv;
 }
 
-function splitAmountArray(addressAmountParsed: string[]): AddressAmountMap[] {
-  const res: AddressAmountMap[] = [];
+function splitAmountArray(addressAmountParsed: string[]): AddressAmount[] {
+  const res: AddressAmount[] = [];
   let temp: string[] = [];
   for (let addressAmountInfo of addressAmountParsed) {
     temp = addressAmountInfo.split(",");

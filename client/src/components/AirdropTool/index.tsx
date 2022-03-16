@@ -5,10 +5,14 @@ import FileUpload from "./FileUpload";
 import AddressList from "./AddressList";
 import PopUp from "./PopUp";
 import useDualThemeClass from "hooks/useDualThemeClass";
-import { AddressAmountMap, AirdropRequestBody, Token, PopUpType } from "utils";
+import { AddressAmount, AirdropRequestBody, Token, PopUpType } from "utils";
 import { useState } from "react";
 import axios from "axios";
-import { TransactionUnspentOutput, Transaction, TransactionWitnessSet } from "@emurgo/cardano-serialization-lib-asmjs";
+import {
+  TransactionUnspentOutput,
+  Transaction,
+  TransactionWitnessSet,
+} from "@emurgo/cardano-serialization-lib-asmjs";
 import "./index.scss";
 
 const Buffer = require("buffer/").Buffer;
@@ -45,7 +49,7 @@ export default function AirdropTool() {
     const url = process.env.REACT_APP_API_TX;
 
     try {
-      const txData = await axios.post(`${url}/api/v0/validate`, requestBody)
+      const txData = await axios.post(`${url}/api/v0/validate`, requestBody);
       /**
        * TODO: get estimated total fee
        */
@@ -54,14 +58,17 @@ export default function AirdropTool() {
         type: PopUpType.LOADING,
         text: `Sending ${totalAmountToAirdrop} ${selectedToken.name}`,
       });
-      const submitAirdrop = await axios.post(`${url}/api/v0/submit`, requestBody)
-      const cborHexInString = submitAirdrop.data
+      const submitAirdrop = await axios.post(
+        `${url}/api/v0/submit`,
+        requestBody
+      );
+      const cborHexInString = submitAirdrop.data;
       /**
        * Hi TOM! :)
        * please continue here
-       */      
+       */
     } catch (e: any) {
-      console.log(e)
+      console.log(e);
       switch (e.response?.status) {
         case 406: {
           setPopUpProps({
@@ -109,12 +116,12 @@ export default function AirdropTool() {
 function prepareBody(
   walletAddress: string,
   selectedToken: Token,
-  addressArray: AddressAmountMap[]
+  addressArray: AddressAmount[]
 ) {
   const body: AirdropRequestBody = {
     source_addresses: [walletAddress],
     token_name: `${selectedToken.policyId}.${selectedToken.nameHex}`,
-    addresses: addressArray.map((addr: AddressAmountMap) => ({
+    addresses: addressArray.map((addr: AddressAmount) => ({
       [addr.address]: addr.amount * Math.pow(10, selectedToken.decimals),
     })),
   };
