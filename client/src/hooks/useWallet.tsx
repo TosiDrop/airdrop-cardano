@@ -102,6 +102,7 @@ export default function useWallet() {
             addressAmountObj = {
               address,
               amount: assetAmountInUtxo,
+              adaAmount: amount,
             };
 
             if (!assetAddresses[policyIdString][assetNameHex]) {

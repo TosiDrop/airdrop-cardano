@@ -24,13 +24,8 @@ export default function AirdropTool() {
     el: "child",
   });
 
-  const { selectedToken, addressArray, totalAmountToAirdrop } = useSelector(
-    (state: RootStateOrAny) => state.global
-  );
-
-  const { walletAddress } = useSelector(
-    (state: RootStateOrAny) => state.global
-  );
+  const { selectedToken, addressArray, totalAmountToAirdrop, walletAddress } =
+    useSelector((state: RootStateOrAny) => state.global);
 
   const [popUpProps, setPopUpProps] = useState({
     show: false,
@@ -45,7 +40,12 @@ export default function AirdropTool() {
       text: "Validating request",
     });
 
-    const requestBody = prepareBody(walletAddress, selectedToken, addressArray);
+    const requestBody = prepareBody(
+      walletAddress,
+      selectedToken,
+      addressArray,
+      totalAmountToAirdrop
+    );
     const url = process.env.REACT_APP_API_TX;
 
     try {
@@ -116,10 +116,24 @@ export default function AirdropTool() {
 function prepareBody(
   walletAddress: string,
   selectedToken: Token,
-  addressArray: AddressAmount[]
+  addressArray: AddressAmount[],
+  totalAmountToAirdrop: number
 ) {
+  const sourceAddresses = [];
+  let estimatedAdaNeeded = (2 + addressArray.length * 2) * Math.pow(10, 6);
+  let totalAmountToAirdropInCompleteDecimal = totalAmountToAirdrop;
+  for (let addressAmountObject of selectedToken.addressContainingToken) {
+    totalAmountToAirdropInCompleteDecimal -= addressAmountObject.amount;
+    if (addressAmountObject.adaAmount) {
+      estimatedAdaNeeded -= addressAmountObject.adaAmount;
+    }
+    sourceAddresses.push(addressAmountObject.address);
+    if (totalAmountToAirdropInCompleteDecimal < 0 && estimatedAdaNeeded < 0)
+      break;
+  }
   const body: AirdropRequestBody = {
-    source_addresses: [walletAddress],
+    source_addresses: sourceAddresses,
+    change_address: walletAddress,
     token_name: `${selectedToken.policyId}.${selectedToken.nameHex}`,
     addresses: addressArray.map((addr: AddressAmount) => ({
       [addr.address]: addr.amount * Math.pow(10, selectedToken.decimals),

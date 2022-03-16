@@ -7,6 +7,7 @@
 export interface AddressAmount {
   address: string;
   amount: number;
+  adaAmount?: number;
 }
 
 export interface Token {
