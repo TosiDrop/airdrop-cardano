@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import {
-  setAddressArrayContainingAda,
+  setAddressContainingAda,
   setTokenArray,
   setApi,
 } from "reducers/globalSlice";
@@ -120,7 +120,7 @@ export default function useWallet() {
         assetDetail
       );
       tokenArray.sort((a, b) => (a.name < b.name ? -1 : 1));
-      dispatch(setAddressArrayContainingAda(addressContainingAda));
+      dispatch(setAddressContainingAda(addressContainingAda));
       dispatch(setTokenArray(tokenArray));
     } catch (err) {
       console.log(err);

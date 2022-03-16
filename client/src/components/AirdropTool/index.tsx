@@ -8,11 +8,6 @@ import useDualThemeClass from "hooks/useDualThemeClass";
 import { AddressAmount, AirdropRequestBody, Token, PopUpType } from "utils";
 import { useState } from "react";
 import axios from "axios";
-import {
-  TransactionUnspentOutput,
-  Transaction,
-  TransactionWitnessSet,
-} from "@emurgo/cardano-serialization-lib-asmjs";
 import "./index.scss";
 
 const Buffer = require("buffer/").Buffer;
@@ -24,8 +19,13 @@ export default function AirdropTool() {
     el: "child",
   });
 
-  const { selectedToken, addressArray, totalAmountToAirdrop, walletAddress } =
-    useSelector((state: RootStateOrAny) => state.global);
+  const {
+    selectedToken,
+    addressArray,
+    totalAmountToAirdrop,
+    walletAddress,
+    addressContainingAda,
+  } = useSelector((state: RootStateOrAny) => state.global);
 
   const [popUpProps, setPopUpProps] = useState({
     show: false,
@@ -44,7 +44,8 @@ export default function AirdropTool() {
       walletAddress,
       selectedToken,
       addressArray,
-      totalAmountToAirdrop
+      totalAmountToAirdrop,
+      addressContainingAda
     );
     const url = process.env.REACT_APP_API_TX;
 
@@ -117,20 +118,30 @@ function prepareBody(
   walletAddress: string,
   selectedToken: Token,
   addressArray: AddressAmount[],
-  totalAmountToAirdrop: number
+  totalAmountToAirdrop: number,
+  addressContainingAda: AddressAmount[]
 ) {
   const sourceAddresses = [];
   let estimatedAdaNeeded = (2 + addressArray.length * 2) * Math.pow(10, 6);
   let totalAmountToAirdropInCompleteDecimal = totalAmountToAirdrop;
+
   for (let addressAmountObject of selectedToken.addressContainingToken) {
+    if (totalAmountToAirdropInCompleteDecimal < 0 && estimatedAdaNeeded < 0)
+      break;
     totalAmountToAirdropInCompleteDecimal -= addressAmountObject.amount;
     if (addressAmountObject.adaAmount) {
       estimatedAdaNeeded -= addressAmountObject.adaAmount;
     }
     sourceAddresses.push(addressAmountObject.address);
-    if (totalAmountToAirdropInCompleteDecimal < 0 && estimatedAdaNeeded < 0)
-      break;
   }
+
+  for (let addressAmountObject of addressContainingAda) {
+    if (estimatedAdaNeeded < 0) break;
+    if (!sourceAddresses.includes(addressAmountObject.address)) {
+      estimatedAdaNeeded -= addressAmountObject.amount;
+    }
+  }
+
   const body: AirdropRequestBody = {
     source_addresses: sourceAddresses,
     change_address: walletAddress,

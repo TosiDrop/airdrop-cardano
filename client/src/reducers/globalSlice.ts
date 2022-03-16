@@ -32,7 +32,7 @@ export const globalSlice = createSlice({
     setLoadingApi: (state, { payload }: PayloadAction<boolean>) => {
       state.loadingApi = payload;
     },
-    setAddressArrayContainingAda: (
+    setAddressContainingAda: (
       state,
       { payload }: PayloadAction<AddressAmount[]>
     ) => {
@@ -63,7 +63,7 @@ export const {
   setLoadingApi,
   setApi,
   setWalletAddress,
-  setAddressArrayContainingAda,
+  setAddressContainingAda,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;
