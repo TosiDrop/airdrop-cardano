@@ -166,6 +166,7 @@ class EventValidate(Resource):
             return msg, 406
         else:
             extra_ada = int(len(airdrops_list) / ADDRESSES_PER_TRANSACTION * (860000 + EXTRA_LOVELACE) / 1000000 + 1)
+            extra_lovelace = len(airdrops_list) / ADDRESSES_PER_TRANSACTION * 680000
             applog.info('Airdrop is possible - available amounts are more than the amounts to spend.')
             if ceil(len(airdrops_list) / ADDRESSES_PER_TRANSACTION) > 1:
                 # we need more transactions
@@ -185,7 +186,8 @@ class EventValidate(Resource):
         else:
             msg['transactions_count'] = 1
         msg['message'] = 'Airdrop is possible - available amounts are more than the amounts to spend. '
-        msg['message'] += 'Please be sure there are about %d extra ADA in the source address.' % extra_ada
+        msg['message'] += 'Estimated transaction fee: %d lovelace' % (extra_ada * 1000000)
+        msg['tx_fee'] = int(155000 + extra_lovelace)
         resp = make_response(msg)
         resp.headers['Access-Control-Allow-Origin'] = '*'
         resp.headers['Content-Type'] = 'application/json'
@@ -443,6 +445,7 @@ class EventSubmit(Resource):
                 msg['error'] = 'Server error: %s' % err
                 return msg, 503
             applog.info(out)
+            transaction_fee = out.strip().split(' ')[-1]
 
             # get the transaction id
             cmd = ["cardano-cli", "transaction", "txid", "--tx-body-file", TRANSACTIONS_PATH + '/tx.raw']
@@ -488,6 +491,7 @@ class EventSubmit(Resource):
                         (now, airdrop_id))
             conn.commit()
 
+            """
             # encode transactions in cbor format
             cmd = 'jq .cborHex ' + TRANSACTIONS_PATH + '/tx.signed | xxd -r -p > ' + \
                   TRANSACTIONS_PATH + '/tx.signed.cbor'
@@ -495,9 +499,7 @@ class EventSubmit(Resource):
             out = stream.read().strip()
             applog.debug(out)
 
-            """
-            Update the transaction status - cbor encoded
-            """
+            # Update the transaction status - cbor encoded
             now = datetime.datetime.now()
             cur.execute("UPDATE transactions SET status = 'transaction cbor encoded', date = ? WHERE id = ?",
                         (now, trans_id))
@@ -511,24 +513,26 @@ class EventSubmit(Resource):
             stream = os.popen(cmd)
             out = stream.read().strip()
             applog.debug(out)
+            """
 
             """
             Return the transaction to the website
             """
             try:
-                with open(TRANSACTIONS_PATH + '/tx.signed.cbor', 'rb') as f:
+                with open(TRANSACTIONS_PATH + '/tx.signed', 'r') as f:
                     cbor_transaction = f.read()
             except Exception as exc:
-                applog.error('Exception reading the cbor encoded signe transaction file %s' %
-                             TRANSACTIONS_PATH + '/tx.signed.cbor')
+                applog.error('Exception reading the signed transaction file %s' %
+                             TRANSACTIONS_PATH + '/tx.signed')
                 applog.exception(exc)
 
             resp = make_response(cbor_transaction)
             resp.headers['Access-Control-Allow-Origin'] = '*'
             resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
                                                            'Cache-Control,Content-Type,Range'
-            resp.headers['Content-Type'] = 'application/cbor'
+            resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'Single-Transaction'
+            resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
             return resp
 
         else:
@@ -602,6 +606,7 @@ class EventSubmit(Resource):
                 msg['error'] = 'Server error: %s' % err
                 return msg, 503
             applog.info(out)
+            transaction_fee = out.strip().split(' ')[-1]
 
             # get the transaction id
             cmd = ["cardano-cli", "transaction", "txid", "--tx-body-file", TRANSACTIONS_PATH + '/tx.raw']
@@ -647,6 +652,7 @@ class EventSubmit(Resource):
                         (now, airdrop_id))
             conn.commit()
 
+            """
             # encode transactions in cbor format
             cmd = 'jq .cborHex ' + TRANSACTIONS_PATH + '/tx.signed | xxd -r -p > ' + \
                   TRANSACTIONS_PATH + '/tx.signed.cbor'
@@ -654,9 +660,7 @@ class EventSubmit(Resource):
             out = stream.read().strip()
             applog.debug(out)
 
-            """
-            Update the transaction status - cbor encoded
-            """
+            #Update the transaction status - cbor encoded
             now = datetime.datetime.now()
             cur.execute("UPDATE transactions SET status = 'transaction cbor encoded', date = ? WHERE id = ?",
                         (now, trans_id))
@@ -670,16 +674,17 @@ class EventSubmit(Resource):
             stream = os.popen(cmd)
             out = stream.read().strip()
             applog.debug(out)
+            """
 
             """
             Return the transaction to the website
             """
             try:
-                with open(TRANSACTIONS_PATH + '/tx.signed.cbor', 'rb') as f:
+                with open(TRANSACTIONS_PATH + '/tx.signed', 'r') as f:
                     cbor_transaction = f.read()
             except Exception as exc:
-                applog.error('Exception reading the cbor encoded signe transaction file %s' %
-                             TRANSACTIONS_PATH + '/tx.signed.cbor')
+                applog.error('Exception reading the signed transaction file %s' %
+                             TRANSACTIONS_PATH + '/tx.signed')
                 applog.exception(exc)
 
             now = datetime.datetime.now()
@@ -714,8 +719,9 @@ class EventSubmit(Resource):
             resp.headers['Access-Control-Allow-Origin'] = '*'
             resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
                                                            'Cache-Control,Content-Type,Range'
-            resp.headers['Content-Type'] = 'application/cbor'
+            resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'UTxO-Create-Transaction'
+            resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
             resp.headers['Airdrop-Hash'] = airdrop_hash
             return resp
 
@@ -733,13 +739,13 @@ class EventSubmitTransaction(Resource):
         try:
             if request.data:
                 data = request.data
-                with open(TRANSACTIONS_PATH + '/transaction_file.cbor', 'wb') as f:
+                with open(TRANSACTIONS_PATH + '/transaction_file.signed', 'wb') as f:
                     f.write(data)
             elif len(request.files) > 0:
                 args = transaction_parser.parse_args()
                 if 'multipart/form-data' in request.content_type:
-                    args['transaction_file'].save(TRANSACTIONS_PATH + '/transaction_file.cbor')
-                    with open(TRANSACTIONS_PATH + '/transaction_file.cbor', 'rb') as f:
+                    args['transaction_file'].save(TRANSACTIONS_PATH + '/transaction_file.signed')
+                    with open(TRANSACTIONS_PATH + '/transaction_file.signed', 'rb') as f:
                         data = f.read()
                 else:
                     applog.error('Unsupported data type')
@@ -756,9 +762,10 @@ class EventSubmitTransaction(Resource):
             msg['error'] = 'Not Acceptable client error'
             return msg, 406
 
+        """
         # list the transaction file on disk, to see that everything is fine
         # and that the size is ok (less than the maximum transaction size of 16 KB)
-        cmd = 'ls -l ' + TRANSACTIONS_PATH + '/transaction_file.cbor'
+        cmd = 'ls -l ' + TRANSACTIONS_PATH + '/transaction_file.signed'
         stream = os.popen(cmd)
         out = stream.read().strip()
         applog.debug(out)
@@ -774,6 +781,7 @@ class EventSubmitTransaction(Resource):
         except Exception as e:
             applog.exception(e)
             return 'Server error: %s' % str(e), 503
+        """
 
         # get the transaction id
         cmd = ["cardano-cli", "transaction", "txid", "--tx-file", TRANSACTIONS_PATH + '/transaction_file.signed']
@@ -973,6 +981,7 @@ class EventGetTransaction(Resource):
             msg['error'] = 'Server error: %s' % err
             return msg, 503
         applog.info(out)
+        transaction_fee = out.strip().split(' ')[-1]
 
         # sign transaction
         _, err = sign_transaction(SRC_KEYS, trans_filename_prefix + '.raw', trans_filename_prefix + '.signed')
@@ -1001,6 +1010,7 @@ class EventGetTransaction(Resource):
         """
         TO DO: see what errors could happen here and treat them
         """
+        """
         # encode transactions in cbor format
         cmd = 'jq .cborHex ' + trans_filename_prefix + '.signed | xxd -r -p > ' \
               + trans_filename_prefix + '.signed.cbor'
@@ -1019,21 +1029,28 @@ class EventGetTransaction(Resource):
         out = stream.read().strip()
         applog.debug(out)
         conn.close()
+        """
+        now = datetime.datetime.now()
+        cur.execute("UPDATE transactions SET status = 'transaction created and signed', date = ?, hash = ? "
+                    "WHERE id = ?", (now, txid, trans_id))
+        conn.commit()
+
 
         try:
-            with open(trans_filename_prefix + '.signed.cbor', 'rb') as f:
+            with open(trans_filename_prefix + '.signed', 'r') as f:
                 cbor_transaction = f.read()
         except Exception as exc:
-            applog.error('Exception reading the cbor encoded signed transaction file %s' %
-                         trans_filename_prefix + '.signed.cbor')
+            applog.error('Exception reading the signed transaction file %s' %
+                         trans_filename_prefix + '.signed')
             applog.exception(exc)
 
         resp = make_response(cbor_transaction)
         resp.headers['Access-Control-Allow-Origin'] = '*'
         resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
                                                        'Cache-Control,Content-Type,Range'
-        resp.headers['Content-Type'] = 'application/cbor'
+        resp.headers['Content-Type'] = 'application/json'
         resp.headers['Transaction-Type'] = 'airdrop_transaction_' + str(transaction_nr)
+        resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
         resp.headers['Airdrop-Hash'] = airdrop_hash
         return resp
 
