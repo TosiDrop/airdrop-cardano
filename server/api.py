@@ -533,6 +533,7 @@ class EventSubmit(Resource):
             resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'Single-Transaction'
             resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
+            resp.headers['Transaction-Id'] = txid
             return resp
 
         else:
@@ -722,6 +723,7 @@ class EventSubmit(Resource):
             resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'UTxO-Create-Transaction'
             resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
+            resp.headers['Transaction-Id'] = txid
             resp.headers['Airdrop-Hash'] = airdrop_hash
             return resp
 
@@ -793,7 +795,7 @@ class EventSubmitTransaction(Resource):
             msg['error'] = 'Server error: %s' % err
             return msg, 503
         txid = out.strip()
-        applog.info('Transaction ID: %s' % txid)
+        applog.info('Received transaction ID: %s' % txid)
 
         """
         Get the transaction information from the database
@@ -1051,6 +1053,7 @@ class EventGetTransaction(Resource):
         resp.headers['Content-Type'] = 'application/json'
         resp.headers['Transaction-Type'] = 'airdrop_transaction_' + str(transaction_nr)
         resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
+        resp.headers['Transaction-Id'] = txid
         resp.headers['Airdrop-Hash'] = airdrop_hash
         return resp
 
