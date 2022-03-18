@@ -51,7 +51,8 @@ export default function TokenDetail({
           disabled={
             totalAmountToAirdrop === 0 ||
             selectedToken.name === "" ||
-            addressArrayLength === 0
+            addressArrayLength === 0 ||
+            isAbleToAirdrop
           }
         >
           Validate Airdrop
