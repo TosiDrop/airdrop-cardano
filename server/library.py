@@ -291,7 +291,7 @@ def wait_for_transaction(txid, address, airdrop_id, trans_id, name, applog):
                     break
         if count > TRANSACTION_EXPIRE / SLEEP_TIMEOUT:
             # transaction not found and the transaction has expired
-            applog.info('Transaction %s adopted, updating the database' % txid)
+            applog.info('Transaction %s expired, updating the database' % txid)
             """
             Update the transaction status - adopted
             """
