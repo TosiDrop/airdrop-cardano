@@ -1,4 +1,4 @@
-import { useSelector, RootStateOrAny } from "react-redux";
+import { useSelector, RootStateOrAny, useDispatch } from "react-redux";
 import TokenSelect from "./TokenSelect";
 import TokenDetail from "./TokenDetail";
 import FileUpload from "./FileUpload";
@@ -6,6 +6,7 @@ import AddressList from "./AddressList";
 import PopUp from "components/PopUp";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import { AddressAmount, AirdropRequestBody, Token, PopUpType } from "utils";
+import { setPopUp } from "reducers/globalSlice";
 import { useState } from "react";
 import axios from "axios";
 import "./index.scss";
@@ -14,6 +15,8 @@ const Buffer = require("buffer/").Buffer;
 const COMPONENT_CLASS = "airdrop-tool";
 
 export default function AirdropTool() {
+  const dispatch = useDispatch();
+
   const [CLASS, CHILD_CLASS] = useDualThemeClass({
     main: COMPONENT_CLASS,
     el: "child",
@@ -25,20 +28,17 @@ export default function AirdropTool() {
     totalAmountToAirdrop,
     walletAddress,
     addressContainingAda,
+    popUp,
   } = useSelector((state: RootStateOrAny) => state.global);
 
-  const [popUpProps, setPopUpProps] = useState({
-    show: false,
-    type: PopUpType.LOADING,
-    text: "",
-  });
-
   const sendToken = async () => {
-    setPopUpProps({
-      show: true,
-      type: PopUpType.LOADING,
-      text: "Validating request",
-    });
+    dispatch(
+      setPopUp({
+        show: true,
+        type: PopUpType.LOADING,
+        text: "Validating request",
+      })
+    );
 
     const requestBody = prepareBody(
       walletAddress,
@@ -54,11 +54,13 @@ export default function AirdropTool() {
       /**
        * TODO: get estimated total fee
        */
-      setPopUpProps({
-        show: true,
-        type: PopUpType.LOADING,
-        text: `Sending ${totalAmountToAirdrop} ${selectedToken.name}`,
-      });
+      dispatch(
+        setPopUp({
+          show: true,
+          type: PopUpType.LOADING,
+          text: `Sending ${totalAmountToAirdrop} ${selectedToken.name}`,
+        })
+      );
       const submitAirdrop = await axios.post(
         `${url}/api/v0/submit`,
         requestBody
@@ -72,11 +74,13 @@ export default function AirdropTool() {
       console.log(e);
       switch (e.response?.status) {
         case 406: {
-          setPopUpProps({
-            show: true,
-            type: PopUpType.FAIL,
-            text: "Balance in wallet is not enough",
-          });
+          dispatch(
+            setPopUp({
+              show: true,
+              type: PopUpType.FAIL,
+              text: "Balance in wallet is not enough",
+            })
+          );
           return;
         }
       }
@@ -100,16 +104,6 @@ export default function AirdropTool() {
       <div className={`${COMPONENT_CLASS}__row ${CHILD_CLASS}`}>
         <TokenDetail sendToken={sendToken}></TokenDetail>
       </div>
-      <PopUp
-        {...popUpProps}
-        closePopUp={() =>
-          setPopUpProps({
-            show: false,
-            type: PopUpType.LOADING,
-            text: "",
-          })
-        }
-      ></PopUp>
     </div>
   );
 }

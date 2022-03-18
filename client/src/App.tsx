@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import Navbar from "components/Navbar";
 import AirdropTool from "components/AirdropTool";
+import PopUp from "components/PopUp";
 import useBackgroundImage from "hooks/useBackgroundImage";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
@@ -76,6 +77,7 @@ function App() {
       <div className={CONTAINER_CLASS}>
         <Navbar></Navbar>
         <AirdropTool></AirdropTool>
+        <PopUp></PopUp>
       </div>
     </div>
   );

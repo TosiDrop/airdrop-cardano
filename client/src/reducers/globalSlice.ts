@@ -1,5 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Token, GlobalState, AddressAmount, defaultToken } from "utils";
+import {
+  Token,
+  GlobalState,
+  AddressAmount,
+  defaultToken,
+  PopUpType,
+  PopUpProps,
+} from "utils";
 
 const initialState: GlobalState = {
   api: undefined,
@@ -11,6 +18,11 @@ const initialState: GlobalState = {
   totalAmountToAirdrop: 0,
   loadingApi: false,
   addressContainingAda: [],
+  popUp: {
+    show: false,
+    type: PopUpType.LOADING,
+    text: "",
+  },
 };
 
 export const globalSlice = createSlice({
@@ -51,6 +63,12 @@ export const globalSlice = createSlice({
     setWalletAddress: (state, { payload }: PayloadAction<string>) => {
       state.walletAddress = payload;
     },
+    setPopUp: (state, { payload }: PayloadAction<PopUpProps>) => {
+      state.popUp = { ...payload };
+    },
+    closePopUp: (state) => {
+      state.popUp = { ...state.popUp, show: false };
+    },
   },
 });
 
@@ -64,6 +82,8 @@ export const {
   setApi,
   setWalletAddress,
   setAddressContainingAda,
+  setPopUp,
+  closePopUp,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

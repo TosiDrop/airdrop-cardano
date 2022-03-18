@@ -30,13 +30,13 @@ export interface GlobalState {
   addressContainingAda: AddressAmount[];
   totalAmountToAirdrop: number;
   loadingApi: boolean;
+  popUp: PopUpProps;
 }
 
 export interface PopUpProps {
   show: boolean;
   type: PopUpType;
   text: string;
-  closePopUp: Function;
 }
 
 export interface AirdropRequestBody {
