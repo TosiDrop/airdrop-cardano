@@ -47,9 +47,8 @@ export default function PopUp() {
     }
   };
 
-  return show ? (
-    <div className={`${CONTAINER_CLASS}-container`}>
-      <div className={CLASS}>
+  return <div className={`${getVisibilityClass(show, CONTAINER_CLASS + '-container')} ${CONTAINER_CLASS}-container`}>
+      <div className={`${CLASS} ${getVisibilityClass(show, CONTAINER_CLASS)}`}>
         <h2>{text}</h2>
         {getSymbol(type)}
         <Button onClick={() => dispatch(closePopUp())} className={EL_CLASS}>
@@ -57,5 +56,13 @@ export default function PopUp() {
         </Button>
       </div>
     </div>
-  ) : null;
+}
+
+function getVisibilityClass(show: boolean, classname: string) {
+  console.log(show)
+  if (show) {
+    return `${classname}-show`
+  } else {
+    return `${classname}-hide`
+  }
 }
