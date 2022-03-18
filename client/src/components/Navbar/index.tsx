@@ -23,10 +23,15 @@ export default function Navbar() {
   const loadingApi = useSelector(
     (state: RootStateOrAny) => state.global.loadingApi
   );
+  const [selectedWallet, setSelectedWallet] = useState("");
 
   useEffect(() => {
     if (walletAddress) {
       setBtnText(shortenAddress(walletAddress));
+    }
+    const selectedWalletInLS = localStorage.getItem("wallet");
+    if (selectedWalletInLS) {
+      setSelectedWallet(selectedWalletInLS);
     }
   }, [walletAddress]);
 
@@ -34,8 +39,13 @@ export default function Navbar() {
     return (
       <div className={`${CONTAINER_CLASS}__select-wallet`}>
         {supportedWallets.map((wallet) => {
+          const isSelectedWallet = selectedWallet === wallet.name;
           return (
-            <Button key={wallet.name} onClick={() => enableWallet(wallet.name)}>
+            <Button
+              key={wallet.name}
+              onClick={() => enableWallet(wallet.name)}
+              disabled={isSelectedWallet}
+            >
               {wallet.displayName}
             </Button>
           );
