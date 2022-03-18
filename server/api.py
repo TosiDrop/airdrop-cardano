@@ -520,11 +520,13 @@ class EventSubmit(Resource):
             """
             try:
                 with open(TRANSACTIONS_PATH + '/tx.signed', 'r') as f:
-                    cbor_transaction = f.read()
+                    cbor_transaction = json.loads(f.read())
             except Exception as exc:
                 applog.error('Exception reading the signed transaction file %s' %
                              TRANSACTIONS_PATH + '/tx.signed')
                 applog.exception(exc)
+
+            cbor_transaction['description'] = txid
 
             resp = make_response(cbor_transaction)
             resp.headers['Access-Control-Allow-Origin'] = '*'
@@ -682,7 +684,7 @@ class EventSubmit(Resource):
             """
             try:
                 with open(TRANSACTIONS_PATH + '/tx.signed', 'r') as f:
-                    cbor_transaction = f.read()
+                    cbor_transaction = json.loads(f.read())
             except Exception as exc:
                 applog.error('Exception reading the signed transaction file %s' %
                              TRANSACTIONS_PATH + '/tx.signed')
@@ -716,6 +718,8 @@ class EventSubmit(Resource):
 
             conn.commit()
 
+            cbor_transaction['description'] = txid
+
             resp = make_response(cbor_transaction)
             resp.headers['Access-Control-Allow-Origin'] = '*'
             resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
@@ -740,15 +744,15 @@ class EventSubmitTransaction(Resource):
         """
         try:
             if request.data:
-                data = request.data
-                with open(TRANSACTIONS_PATH + '/transaction_file.signed', 'wb') as f:
-                    f.write(data)
+                data = json.loads(request.data)
+                with open(TRANSACTIONS_PATH + '/transaction_file.signed', 'w') as f:
+                    f.write(json.dumps(data))
             elif len(request.files) > 0:
                 args = transaction_parser.parse_args()
                 if 'multipart/form-data' in request.content_type:
                     args['transaction_file'].save(TRANSACTIONS_PATH + '/transaction_file.signed')
-                    with open(TRANSACTIONS_PATH + '/transaction_file.signed', 'rb') as f:
-                        data = f.read()
+                    with open(TRANSACTIONS_PATH + '/transaction_file.signed', 'r') as f:
+                        data = json.loads(f.read())
                 else:
                     applog.error('Unsupported data type')
                     msg = {}
@@ -763,6 +767,9 @@ class EventSubmitTransaction(Resource):
             msg = {}
             msg['error'] = 'Not Acceptable client error'
             return msg, 406
+
+        # transaction ID received after being signed
+        old_txid = data['description']
 
         """
         # list the transaction file on disk, to see that everything is fine
@@ -805,7 +812,7 @@ class EventSubmitTransaction(Resource):
         cur.execute("SELECT t.id, t.airdrop_id, t.name, t.description, t.status, t.date, a.hash, td.change_address "
                     "FROM transactions t JOIN airdrops a ON t.airdrop_id = a.id "
                     "JOIN transaction_details td ON t.id = td.transaction_id "
-                    "WHERE t.hash = ? ORDER BY t.id DESC limit 1", (txid, ))
+                    "WHERE t.hash = ? ORDER BY t.id DESC limit 1", (old_txid, ))
         try:
             trans = cur.fetchone()
             trans_id = trans[0]
@@ -829,8 +836,8 @@ class EventSubmitTransaction(Resource):
                 """
                 now = datetime.datetime.now()
                 submit_status = 'submit error: ' + err
-                cur.execute("UPDATE transactions SET status = ?, date = ? WHERE id = ?",
-                            (submit_status, now, trans_id))
+                cur.execute("UPDATE transactions SET hash = ?, status = ?, date = ? WHERE id = ?",
+                            (txid, submit_status, now, trans_id))
                 submit_status = name.replace('_', ' ') + ' transaction submit error'
                 cur.execute("UPDATE airdrops SET status = ?, date = ? WHERE id = ?",
                             (submit_status, now, airdrop_id))
@@ -840,10 +847,10 @@ class EventSubmitTransaction(Resource):
                 return msg, 503
 
         except Exception as exc:
-            applog.error('Transaction %s not found' % txid)
+            applog.error('Transaction %s not found' % old_txid)
             applog.exception(exc)
             msg = {}
-            msg['error'] = 'Transaction %s not found' % txid
+            msg['error'] = 'Transaction %s not found' % old_txid
             return msg, 503
 
         """
@@ -851,8 +858,8 @@ class EventSubmitTransaction(Resource):
         """
         now = datetime.datetime.now()
         submit_status = name.replace('_', ' ') + ' submitted'
-        cur.execute("UPDATE transactions SET status = 'transaction submitted', date = ? WHERE id = ?",
-                    (now, trans_id))
+        cur.execute("UPDATE transactions SET hash = ?, status = 'transaction submitted', date = ? WHERE id = ?",
+                    (txid, now, trans_id))
         cur.execute("UPDATE airdrops SET status = ?, date = ? WHERE id = ?",
                     (submit_status, now, airdrop_id))
         conn.commit()
@@ -865,7 +872,7 @@ class EventSubmitTransaction(Resource):
         msg = {}
         msg['airdrop_hash'] = airdrop_hash
         msg['transaction_id'] = txid
-        msg['status'] = 'transaction submitted'
+        msg['status'] = 'transaction %s submitted' % old_txid
         resp = make_response(msg)
         resp.headers['Access-Control-Allow-Origin'] = '*'
         resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
@@ -1040,11 +1047,13 @@ class EventGetTransaction(Resource):
 
         try:
             with open(trans_filename_prefix + '.signed', 'r') as f:
-                cbor_transaction = f.read()
+                cbor_transaction = json.loads(f.read())
         except Exception as exc:
             applog.error('Exception reading the signed transaction file %s' %
                          trans_filename_prefix + '.signed')
             applog.exception(exc)
+
+        chor_transaction['description'] = txid
 
         resp = make_response(cbor_transaction)
         resp.headers['Access-Control-Allow-Origin'] = '*'
