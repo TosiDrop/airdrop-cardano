@@ -3,11 +3,13 @@ import {
   setAddressContainingAda,
   setTokenArray,
   setApi,
+  setPopUp,
 } from "reducers/globalSlice";
 import {
   AddressAmount,
   PolicyIDAndAssetNameToAddressAmountMap,
   PolicyIDAndAssetNameToAmountMap,
+  PopUpType,
 } from "utils";
 import {
   connectWallet,
@@ -30,7 +32,13 @@ export default function useWallet() {
       const API = await connectWallet(walletName);
       dispatch(setApi(API));
     } catch (err: any) {
-      window.alert(err.message);
+      dispatch(
+        setPopUp({
+          type: PopUpType.FAIL,
+          text: "Wallet not set. Enable Dapp account.",
+          show: true,
+        })
+      );
     }
   };
 
