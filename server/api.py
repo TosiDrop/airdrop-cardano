@@ -303,7 +303,6 @@ class EventSubmit(Resource):
         transaction = {}
         inputs = []
         outputs = []
-        # change_address = src_addr
         trans_lovelace = 0
         trans_tokens = 0
         count = 0
@@ -488,43 +487,19 @@ class EventSubmit(Resource):
             conn.commit()
 
             """
-            # encode transactions in cbor format
-            cmd = 'jq .cborHex ' + TRANSACTIONS_PATH + '/tx.signed | xxd -r -p > ' + \
-                  TRANSACTIONS_PATH + '/tx.signed.cbor'
-            stream = os.popen(cmd)
-            out = stream.read().strip()
-            applog.debug(out)
-
-            # Update the transaction status - cbor encoded
-            now = datetime.datetime.now()
-            cur.execute("UPDATE transactions SET status = 'transaction cbor encoded', date = ? WHERE id = ?",
-                        (now, trans_id))
-            cur.execute("UPDATE airdrops SET status = 'single transaction cbor encoded', date  = ? WHERE id = ?",
-                        (now, airdrop_id))
-            conn.commit()
-
-            # list the transaction file on disk, to see that everything is fine
-            # and that the size is ok (less than the maximum transaction size of 16 KB)
-            cmd = 'ls -l ' + TRANSACTIONS_PATH + '/tx.signed.cbor'
-            stream = os.popen(cmd)
-            out = stream.read().strip()
-            applog.debug(out)
-            """
-
-            """
             Return the transaction to the website
             """
             try:
                 with open(TRANSACTIONS_PATH + '/tx.signed', 'r') as f:
-                    cbor_transaction = json.loads(f.read())
+                    signed_transaction = json.loads(f.read())
             except Exception as exc:
                 applog.error('Exception reading the signed transaction file %s' %
                              TRANSACTIONS_PATH + '/tx.signed')
                 applog.exception(exc)
 
-            cbor_transaction['description'] = txid
+            signed_transaction['description'] = txid
 
-            resp = make_response(cbor_transaction)
+            resp = make_response(signed_transaction)
             resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'Single-Transaction'
             resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
@@ -648,35 +623,11 @@ class EventSubmit(Resource):
             conn.commit()
 
             """
-            # encode transactions in cbor format
-            cmd = 'jq .cborHex ' + TRANSACTIONS_PATH + '/tx.signed | xxd -r -p > ' + \
-                  TRANSACTIONS_PATH + '/tx.signed.cbor'
-            stream = os.popen(cmd)
-            out = stream.read().strip()
-            applog.debug(out)
-
-            #Update the transaction status - cbor encoded
-            now = datetime.datetime.now()
-            cur.execute("UPDATE transactions SET status = 'transaction cbor encoded', date = ? WHERE id = ?",
-                        (now, trans_id))
-            cur.execute("UPDATE airdrops SET status = 'utxo transaction cbor encoded', date  = ? WHERE id = ?",
-                        (now, airdrop_id))
-            conn.commit()
-
-            # list the transaction file on disk, to see that everything is fine
-            # and that the size is ok (less than the maximum transaction size of 16 KB)
-            cmd = 'ls -l ' + TRANSACTIONS_PATH + '/tx.signed.cbor'
-            stream = os.popen(cmd)
-            out = stream.read().strip()
-            applog.debug(out)
-            """
-
-            """
             Return the transaction to the website
             """
             try:
                 with open(TRANSACTIONS_PATH + '/tx.signed', 'r') as f:
-                    cbor_transaction = json.loads(f.read())
+                    signed_transaction = json.loads(f.read())
             except Exception as exc:
                 applog.error('Exception reading the signed transaction file %s' %
                              TRANSACTIONS_PATH + '/tx.signed')
@@ -710,9 +661,9 @@ class EventSubmit(Resource):
 
             conn.commit()
 
-            cbor_transaction['description'] = txid
+            signed_transaction['description'] = txid
 
-            resp = make_response(cbor_transaction)
+            resp = make_response(signed_transaction)
             resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'UTxO-Create-Transaction'
             resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
@@ -758,27 +709,6 @@ class EventSubmitTransaction(Resource):
 
         # transaction ID received after being signed
         old_txid = data['description']
-
-        """
-        # list the transaction file on disk, to see that everything is fine
-        # and that the size is ok (less than the maximum transaction size of 16 KB)
-        cmd = 'ls -l ' + TRANSACTIONS_PATH + '/transaction_file.signed'
-        stream = os.popen(cmd)
-        out = stream.read().strip()
-        applog.debug(out)
-
-        try:
-            cmd = 'xxd -p < ' + TRANSACTIONS_PATH + '/transaction_file.cbor'
-            stream = os.popen(cmd)
-            out = stream.read().strip()
-            transaction = json.loads(TRANSACTION_TEMPLATE)
-            transaction['cborHex'] = out.replace('\n', '')
-            with open(TRANSACTIONS_PATH + '/transaction_file.signed', 'w') as f:
-                f.write(json.dumps(transaction, indent=4))
-        except Exception as e:
-            applog.exception(e)
-            return 'Server error: %s' % str(e), 503
-        """
 
         # get the transaction id
         cmd = ["cardano-cli", "transaction", "txid", "--tx-file", TRANSACTIONS_PATH + '/transaction_file.signed']
@@ -866,189 +796,177 @@ class EventSubmitTransaction(Resource):
         return resp
 
 
-@ns.route('/get_transaction/<string:airdrop_hash>/<int:transaction_nr>')
+@ns.route('/get_transactions/<string:airdrop_hash>')
 @api.response(HTTPStatus.OK.value, "OK")
 @api.response(HTTPStatus.NOT_ACCEPTABLE.value, "Not Acceptable client error")
 @api.response(HTTPStatus.SERVICE_UNAVAILABLE.value, "Server error")
 @api.doc(parser=transaction_parser)
-class EventGetTransaction(Resource):
-    def get(self, airdrop_hash, transaction_nr=0):
+class EventGetTransactions(Resource):
+    def get(self, airdrop_hash):
         """
-        Get the transaction in cbor format
+        Get the airdrop transactions in json format
         """
-        if transaction_nr == 0:
-            applog.debug('get all transactions')
-        else:
-            applog.debug('get transaction_%d' % transaction_nr)
-
         conn = sqlite3.connect(DB_NAME)
         cur = conn.cursor()
+
+        cur.execute("SELECT max(id) from airdrops WHERE hash = ?", (airdrop_hash, ))
+        try:
+            item = cur.fetchone()
+            if not item:
+                return 'Airdrop not found', 406
+            airdrop_id = item[0]
+            applog.debug(airdrop_id)
+        except Exception as exc:
+            applog.exception(exc)
+            return 'Exception: %s' % str(exc), 503
+
         cur.execute("SELECT t.id, t.airdrop_id, t.name, t.status, t.date, a.hash, "
                     "td.src_addresses, td.inputs, td.outputs, td.change_address, "
                     "td.amount_lovelace, td.amount_tokens "
                     "FROM transactions t JOIN airdrops a ON t.airdrop_id = a.id "
                     "JOIN transaction_details td on t.id = td.transaction_id "
-                    "WHERE a.hash = ? and t.name = ? ORDER BY t.id DESC limit 1",
-                    (airdrop_hash, 'airdrop_transaction_' + str(transaction_nr)))
-        trans_id = 0
-        airdrop_id = 0
-        src_addresses = []
-        outputs = []
-        change_address = ''
-        amount_lovelace = 0
-        amount_tokens = 0
+                    "WHERE a.id = ? AND t.name <> 'utxo_transaction' ORDER BY t.id",
+                    (airdrop_id, ))
         try:
-            trans = cur.fetchone()
-            if not trans:
-                return 'Transaction not found', 406
-            trans_id = trans[0]
-            airdrop_id = trans[1]
-            src_addresses = json.loads(trans[6])
-            outputs = json.loads(trans[8])
-            change_address = trans[9]
-            amount_lovelace = trans[10]
-            amount_tokens = trans[11]
+            transactions = cur.fetchall()
+            if not transactions:
+                return 'Airdrop not found', 406
         except Exception as exc:
             applog.exception(exc)
+            return 'Exception: %s' % str(exc), 503
 
-        # get available amounts at the src_addresses
-        source_transactions, src_transactions, src_token_transactions, tokens_amounts, \
-            err = get_available_amounts(src_addresses)
-        if err:
-            applog.error(err)
-            return err, 503
+        resp_transactions = []
+        transaction_nr = 0
+        transaction_fees = 0
+        for trans in transactions:
+            try:
+                trans_id = trans[0]
+                airdrop_id = trans[1]
+                src_addresses = json.loads(trans[6])
+                outputs = json.loads(trans[8])
+                change_address = trans[9]
+                amount_lovelace = trans[10]
+                amount_tokens = trans[11]
+            except Exception as exc:
+                applog.exception(exc)
+                return 'Exception: %s' % str(exc), 503
 
-        token_name = list(outputs[0].keys())[2]
-        inputs = []
-        i_found = False
-        for t in src_token_transactions:
-            for token in t['amounts']:
-                if token['token'] == 'lovelace' and amount_lovelace + EXTRA_LOVELACE != int(token['amount']):
-                    continue
-                elif token['token'] == token_name and amount_tokens != int(token['amount']):
-                    continue
-                elif token['token'] != token_name:
-                    continue
-                # found the right UTxO
-                i_found = True
-                i = {}
-                i['hash'] = t['hash']
-                i['id'] = t['id']
-                inputs.append(i)
-                src_token_transactions.remove(t)
-                break
-            if i_found:
-                break
+            transaction_nr += 1
+            # get available amounts at the src_addresses
+            source_transactions, src_transactions, src_token_transactions, tokens_amounts, \
+                err = get_available_amounts(src_addresses)
+            if err:
+                applog.error(err)
+                return err, 503
 
-        if not i_found:
-            return 'UTxO not found', 503
+            token_name = list(outputs[0].keys())[2]
+            inputs = []
+            i_found = False
+            for t in src_token_transactions:
+                for token in t['amounts']:
+                    if token['token'] == 'lovelace' and amount_lovelace + EXTRA_LOVELACE != int(token['amount']):
+                        continue
+                    elif token['token'] == token_name and amount_tokens != int(token['amount']):
+                        continue
+                    elif token['token'] != token_name:
+                        continue
+                    # found the right UTxO
+                    i_found = True
+                    i = {}
+                    i['hash'] = t['hash']
+                    i['id'] = t['id']
+                    inputs.append(i)
+                    src_token_transactions.remove(t)
+                    break
+                if i_found:
+                    break
 
-        out, err = get_tip()
-        if err and 'Warning' not in err and 'Ok.' not in err:
-            msg = {}
-            msg['error'] = err.strip()
-            return msg, 503
-        # set transaction expire time in TRANSACTION_EXPIRE seconds (default 86400 = 1 day)
-        expire = json.loads(out)['slot'] + TRANSACTION_EXPIRE
+            if not i_found:
+                return 'UTxO not found', 503
 
-        cmd = ['cardano-cli', 'transaction', 'build']
-        trans_filename_prefix = TRANSACTIONS_PATH + '/tx' + str(transaction_nr)
-        # add the inputs
-        for t in inputs:
-            cmd.append('--tx-in')
-            cmd.append(t['hash'] + '#' + str(t['id']))
-        for t in outputs:
-            cmd.append('--tx-out')
-            cmd.append(t['address'] + '+' + str(t['lovelace']) + '+' + str(t[token_name]) + ' ' + token_name + '')
-        cmd.append('--change-address')
-        cmd.append(change_address)
-        cmd.append('--invalid-hereafter')
-        cmd.append(str(expire))
-        cmd.append('--out-file')
-        cmd.append(trans_filename_prefix + '.raw')
-        cmd.append(CARDANO_NET)
-        if len(MAGIC_NUMBER) != 0:
-            cmd.append(str(MAGIC_NUMBER))
-        out, err = cardano_cli_cmd(cmd)
-        if err:
-            applog.error(err)
+            out, err = get_tip()
+            if err and 'Warning' not in err and 'Ok.' not in err:
+                msg = {}
+                msg['error'] = err.strip()
+                return msg, 503
+            # set transaction expire time in TRANSACTION_EXPIRE seconds (default 86400 = 1 day)
+            expire = json.loads(out)['slot'] + TRANSACTION_EXPIRE
+
+            cmd = ['cardano-cli', 'transaction', 'build']
+            trans_filename_prefix = TRANSACTIONS_PATH + '/tx' + str(transaction_nr)
+            # add the inputs
+            for t in inputs:
+                cmd.append('--tx-in')
+                cmd.append(t['hash'] + '#' + str(t['id']))
+            for t in outputs:
+                cmd.append('--tx-out')
+                cmd.append(t['address'] + '+' + str(t['lovelace']) + '+' + str(t[token_name]) + ' ' + token_name + '')
+            cmd.append('--change-address')
+            cmd.append(change_address)
+            cmd.append('--invalid-hereafter')
+            cmd.append(str(expire))
+            cmd.append('--out-file')
+            cmd.append(trans_filename_prefix + '.raw')
+            cmd.append(CARDANO_NET)
+            if len(MAGIC_NUMBER) != 0:
+                cmd.append(str(MAGIC_NUMBER))
+            out, err = cardano_cli_cmd(cmd)
+            if err:
+                applog.error(err)
+                now = datetime.datetime.now()
+                cur.execute("UPDATE airdrops SET status = ?, date = ? WHERE id = ?",
+                            ('error creating airdrop transactions: ' + err, now, airdrop_id))
+                conn.commit()
+                msg = {}
+                msg['error'] = 'Server error: %s' % err
+                return msg, 503
+            applog.info(out)
+            transaction_fees += int(out.strip().split(' ')[-1])
+
+            # sign transaction
+            _, err = sign_transaction(SRC_KEYS, trans_filename_prefix + '.raw', trans_filename_prefix + '.signed')
+            if err:
+                applog.error(err)
+                now = datetime.datetime.now()
+                cur.execute("UPDATE airdrops SET status = ?, date = ? WHERE id = ?",
+                            ('error signing airdrop transactions: ' + err, now, airdrop_id))
+                conn.commit()
+                msg = {}
+                msg['error'] = 'Server error: %s' % err
+                return msg, 503
+
+            # get the transaction id
+            cmd = ["cardano-cli", "transaction", "txid", "--tx-file", trans_filename_prefix + '.signed']
+            # execute the command
+            out, err = cardano_cli_cmd(cmd)
+            if err:
+                applog.error(err)
+                msg = {}
+                msg['error'] = 'Server error: %s' % err
+                return msg, 503
+            txid = out.strip()
+            applog.info('Transaction ID: %s' % txid)
+
             now = datetime.datetime.now()
-            cur.execute("UPDATE airdrops SET status = ?, date = ? WHERE id = ?",
-                        ('error creating airdrop transactions: ' + err, now, airdrop_id))
+            cur.execute("UPDATE transactions SET status = 'transaction created and signed', date = ?, hash = ? "
+                        "WHERE id = ?", (now, txid, trans_id))
             conn.commit()
-            msg = {}
-            msg['error'] = 'Server error: %s' % err
-            return msg, 503
-        applog.info(out)
-        transaction_fee = out.strip().split(' ')[-1]
 
-        # sign transaction
-        _, err = sign_transaction(SRC_KEYS, trans_filename_prefix + '.raw', trans_filename_prefix + '.signed')
-        if err:
-            applog.error(err)
-            now = datetime.datetime.now()
-            cur.execute("UPDATE airdrops SET status = ?, date = ? WHERE id = ?",
-                        ('error signing airdrop transactions: ' + err, now, airdrop_id))
-            conn.commit()
-            msg = {}
-            msg['error'] = 'Server error: %s' % err
-            return msg, 503
+            try:
+                with open(trans_filename_prefix + '.signed', 'r') as f:
+                    signed_transaction = json.loads(f.read())
+            except Exception as exc:
+                applog.error('Exception reading the signed transaction file %s' %
+                             trans_filename_prefix + '.signed')
+                applog.exception(exc)
 
-        # get the transaction id
-        cmd = ["cardano-cli", "transaction", "txid", "--tx-file", trans_filename_prefix + '.signed']
-        # execute the command
-        out, err = cardano_cli_cmd(cmd)
-        if err:
-            applog.error(err)
-            msg = {}
-            msg['error'] = 'Server error: %s' % err
-            return msg, 503
-        txid = out.strip()
-        applog.info('Transaction ID: %s' % txid)
+            signed_transaction['description'] = txid
+            resp_transactions.append(signed_transaction)
 
-        """
-        TO DO: see what errors could happen here and treat them
-        """
-        """
-        # encode transactions in cbor format
-        cmd = 'jq .cborHex ' + trans_filename_prefix + '.signed | xxd -r -p > ' \
-              + trans_filename_prefix + '.signed.cbor'
-        stream = os.popen(cmd)
-        out = stream.read().strip()
-        applog.info(out)
-
-        now = datetime.datetime.now()
-        cur.execute("UPDATE transactions SET status = 'transaction created, signed and encoded', date = ?, hash = ? "
-                    "WHERE id = ?", (now, txid, trans_id))
-        conn.commit()
-
-        # list the cbor transaction file
-        cmd = 'ls -l ' + trans_filename_prefix + '.signed.cbor'
-        stream = os.popen(cmd)
-        out = stream.read().strip()
-        applog.debug(out)
-        conn.close()
-        """
-        now = datetime.datetime.now()
-        cur.execute("UPDATE transactions SET status = 'transaction created and signed', date = ?, hash = ? "
-                    "WHERE id = ?", (now, txid, trans_id))
-        conn.commit()
-
-
-        try:
-            with open(trans_filename_prefix + '.signed', 'r') as f:
-                cbor_transaction = json.loads(f.read())
-        except Exception as exc:
-            applog.error('Exception reading the signed transaction file %s' %
-                         trans_filename_prefix + '.signed')
-            applog.exception(exc)
-
-        cbor_transaction['description'] = txid
-
-        resp = make_response(cbor_transaction)
+        resp = make_response(json.dumps(resp_transactions))
         resp.headers['Content-Type'] = 'application/json'
         resp.headers['Transaction-Type'] = 'airdrop_transaction_' + str(transaction_nr)
-        resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
+        resp.headers['Transaction-Fee'] = str(transaction_fees) + ' lovelace'
         resp.headers['Airdrop-Hash'] = airdrop_hash
         return resp
 
