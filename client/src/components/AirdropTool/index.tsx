@@ -6,16 +6,18 @@ import AddressList from "./AddressList";
 import PopUp from "components/PopUp";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import { AddressAmount, AirdropRequestBody, Token, PopUpType } from "utils";
-import { setPopUp } from "reducers/globalSlice";
+import { closePopUp, setPopUp } from "reducers/globalSlice";
 import { useState } from "react";
 import axios from "axios";
 import "./index.scss";
 
-const Buffer = require("buffer/").Buffer;
 const COMPONENT_CLASS = "airdrop-tool";
 
 export default function AirdropTool() {
   const dispatch = useDispatch();
+
+  const [txFee, setTxFee] = useState(0);
+  const [isAbleToAirdrop, setTsAbleToAirdrop] = useState(false);
 
   const [CLASS, CHILD_CLASS] = useDualThemeClass({
     main: COMPONENT_CLASS,
@@ -28,10 +30,40 @@ export default function AirdropTool() {
     totalAmountToAirdrop,
     walletAddress,
     addressContainingAda,
-    popUp,
   } = useSelector((state: RootStateOrAny) => state.global);
 
   const sendToken = async () => {
+    dispatch(
+      setPopUp({
+        show: true,
+        type: PopUpType.LOADING,
+        text: `Sending ${totalAmountToAirdrop} ${selectedToken.name}`,
+      })
+    );
+
+    const requestBody = prepareBody(
+      walletAddress,
+      selectedToken,
+      addressArray,
+      totalAmountToAirdrop,
+      addressContainingAda
+    );
+    const url = process.env.REACT_APP_API_TX;
+
+    try {
+      const submitAirdrop = await axios.post(
+        `${url}/api/v0/submit`,
+        requestBody
+      );
+      const cborHexInString = submitAirdrop.data;
+      /**
+       * Hi TOM! :)
+       * please continue here
+       */
+    } catch (e: any) {}
+  };
+
+  const validateAirdropRequest = async () => {
     dispatch(
       setPopUp({
         show: true,
@@ -47,31 +79,24 @@ export default function AirdropTool() {
       totalAmountToAirdrop,
       addressContainingAda
     );
+
     const url = process.env.REACT_APP_API_TX;
 
     try {
       const txData = await axios.post(`${url}/api/v0/validate`, requestBody);
-      /**
-       * TODO: get estimated total fee
-       */
+      const txFee = txData.data.tx_fee;
+      console.log(txFee);
+      const txFeeInAda = (txFee / Math.pow(10, 6)).toFixed(2);
+      setTxFee(Number(txFeeInAda));
+      setTsAbleToAirdrop(true);
       dispatch(
         setPopUp({
           show: true,
-          type: PopUpType.LOADING,
-          text: `Sending ${totalAmountToAirdrop} ${selectedToken.name}`,
+          type: PopUpType.SUCCESS,
+          text: `Airdrop is validated. You can proceed with the airdrop.`,
         })
       );
-      const submitAirdrop = await axios.post(
-        `${url}/api/v0/submit`,
-        requestBody
-      );
-      const cborHexInString = submitAirdrop.data;
-      /**
-       * Hi TOM! :)
-       * please continue here
-       */
     } catch (e: any) {
-      console.log(e);
       switch (e.response?.status) {
         case 406: {
           dispatch(
@@ -102,7 +127,12 @@ export default function AirdropTool() {
         <AddressList></AddressList>
       </div>
       <div className={`${COMPONENT_CLASS}__row ${CHILD_CLASS}`}>
-        <TokenDetail sendToken={sendToken}></TokenDetail>
+        <TokenDetail
+          fee={txFee}
+          sendToken={sendToken}
+          validateAirdropRequest={validateAirdropRequest}
+          isAbleToAirdrop={isAbleToAirdrop}
+        ></TokenDetail>
       </div>
     </div>
   );

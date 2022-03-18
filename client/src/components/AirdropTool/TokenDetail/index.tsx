@@ -7,9 +7,17 @@ const COMPONENT_CLASS = "token-detail";
 
 interface Props {
   sendToken: Function;
+  validateAirdropRequest: Function;
+  fee: number;
+  isAbleToAirdrop: boolean;
 }
 
-export default function TokenDetail({ sendToken }: Props) {
+export default function TokenDetail({
+  sendToken,
+  fee,
+  validateAirdropRequest,
+  isAbleToAirdrop,
+}: Props) {
   const { selectedToken, addressArray, totalAmountToAirdrop } = useSelector(
     (state: RootStateOrAny) => state.global
   );
@@ -35,17 +43,22 @@ export default function TokenDetail({ sendToken }: Props) {
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
         <span>Fee</span>
-        <span>0 ADA</span>
+        <span>{fee} ADA</span>
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
         <Button
-          onClick={() => sendToken()}
+          onClick={() => validateAirdropRequest()}
           disabled={
             totalAmountToAirdrop === 0 ||
             selectedToken.name === "" ||
             addressArrayLength === 0
           }
         >
+          Validate Airdrop
+        </Button>
+      </div>
+      <div className={`${COMPONENT_CLASS}__row`}>
+        <Button onClick={() => sendToken()} disabled={!isAbleToAirdrop}>
           Airdrop
           <IconSend />
         </Button>

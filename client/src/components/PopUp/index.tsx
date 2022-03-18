@@ -66,7 +66,6 @@ export default function PopUp() {
 }
 
 function getVisibilityClass(show: boolean, classname: string) {
-  console.log(show);
   if (show) {
     return `${classname}-show`;
   } else {
