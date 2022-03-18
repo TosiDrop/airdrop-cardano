@@ -35,7 +35,7 @@ export default function useWallet() {
       dispatch(
         setPopUp({
           type: PopUpType.FAIL,
-          text: "Wallet not set. Enable Dapp account.",
+          text: "No account set. Enable Dapp account.",
           show: true,
         })
       );

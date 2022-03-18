@@ -85,7 +85,6 @@ export default function AirdropTool() {
     try {
       const txData = await axios.post(`${url}/api/v0/validate`, requestBody);
       const txFee = txData.data.tx_fee;
-      console.log(txFee);
       const txFeeInAda = (txFee / Math.pow(10, 6)).toFixed(2);
       setTxFee(Number(txFeeInAda));
       setTsAbleToAirdrop(true);
