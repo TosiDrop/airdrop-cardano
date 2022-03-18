@@ -15,7 +15,7 @@ import {
   getAssetDetails,
   getCompleteTokenArray,
   convertBufferToHex,
-} from "./useWallet.helper";
+} from "./helper";
 let Buffer = require("buffer").Buffer;
 
 export default function useWallet() {
@@ -29,9 +29,8 @@ export default function useWallet() {
     try {
       const API = await connectWallet(walletName);
       dispatch(setApi(API));
-    } catch (err) {
-      window.alert("Something is wrong");
-      console.log(err);
+    } catch (err: any) {
+      window.alert(err.message);
     }
   };
 
