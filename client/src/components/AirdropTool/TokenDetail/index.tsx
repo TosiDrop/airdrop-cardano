@@ -8,12 +8,14 @@ const COMPONENT_CLASS = "token-detail";
 interface Props {
   sendToken: Function;
   validateAirdropRequest: Function;
+  adaToSpend: Number;
   fee: number;
   isAbleToAirdrop: boolean;
 }
 
 export default function TokenDetail({
   sendToken,
+  adaToSpend,
   fee,
   validateAirdropRequest,
   isAbleToAirdrop,
@@ -41,10 +43,18 @@ export default function TokenDetail({
           {totalAmountToAirdrop} {selectedToken.name}
         </span>
       </div>
-      <div className={`${COMPONENT_CLASS}__row`}>
-        <span>Fee</span>
-        <span>{fee} ADA</span>
-      </div>
+      {isAbleToAirdrop ? (
+        <>
+          <div className={`${COMPONENT_CLASS}__row`}>
+            <span>Total ADA to spend</span>
+            <span>{adaToSpend} ADA</span>
+          </div>
+          <div className={`${COMPONENT_CLASS}__row`}>
+            <span>Estimated transaction fee</span>
+            <span>{fee} ADA</span>
+          </div>
+        </>
+      ) : null}
       <div className={`${COMPONENT_CLASS}__row`}>
         <Button
           onClick={() => validateAirdropRequest()}

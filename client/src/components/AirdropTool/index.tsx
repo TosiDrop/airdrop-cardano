@@ -5,7 +5,13 @@ import FileUpload from "./FileUpload";
 import AddressList from "./AddressList";
 import PopUp from "components/PopUp";
 import useDualThemeClass from "hooks/useDualThemeClass";
-import { AddressAmount, AirdropRequestBody, Token, PopUpType } from "utils";
+import {
+  AddressAmount,
+  AirdropRequestBody,
+  Token,
+  PopUpType,
+  lovelaceToAda,
+} from "utils";
 import { closePopUp, setPopUp } from "reducers/globalSlice";
 import { useState } from "react";
 import axios from "axios";
@@ -17,6 +23,7 @@ export default function AirdropTool() {
   const dispatch = useDispatch();
 
   const [txFee, setTxFee] = useState(0);
+  const [adaToSpend, setAdaToSpend] = useState(0);
   const [isAbleToAirdrop, setTsAbleToAirdrop] = useState(false);
 
   const [CLASS, CHILD_CLASS] = useDualThemeClass({
@@ -84,9 +91,12 @@ export default function AirdropTool() {
 
     try {
       const txData = await axios.post(`${url}/api/v0/validate`, requestBody);
-      const txFee = txData.data.tx_fee;
-      const txFeeInAda = (txFee / Math.pow(10, 6)).toFixed(2);
-      setTxFee(Number(txFeeInAda));
+      const adaToSpendForTxInAda = lovelaceToAda(
+        txData.data.spend_amounts.lovelace
+      );
+      const txFeeInAda = lovelaceToAda(txData.data.tx_fee);
+      setTxFee(txFeeInAda);
+      setAdaToSpend(adaToSpendForTxInAda);
       setTsAbleToAirdrop(true);
       dispatch(
         setPopUp({
@@ -127,6 +137,7 @@ export default function AirdropTool() {
       </div>
       <div className={`${COMPONENT_CLASS}__row ${CHILD_CLASS}`}>
         <TokenDetail
+          adaToSpend={adaToSpend}
           fee={txFee}
           sendToken={sendToken}
           validateAirdropRequest={validateAirdropRequest}
