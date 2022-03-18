@@ -3,7 +3,7 @@ import TokenSelect from "./TokenSelect";
 import TokenDetail from "./TokenDetail";
 import FileUpload from "./FileUpload";
 import AddressList from "./AddressList";
-import PopUp from "./PopUp";
+import PopUp from "components/PopUp";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import { AddressAmount, AirdropRequestBody, Token, PopUpType } from "utils";
 import { useState } from "react";
