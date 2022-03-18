@@ -5,26 +5,13 @@ from flask import Flask, request, make_response
 from flask_restx import Api, Resource, reqparse
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.datastructures import FileStorage
-import requests
 import hashlib
 from library import *
 import sqlite3
 import logging.handlers
 import datetime
 from math import ceil
-from time import sleep
 
-
-"""
-Set up logging
-"""
-handler = logging.handlers.WatchedFileHandler(LOG_FILE)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-
-applog = logging.getLogger('airdrops')
-applog.addHandler(handler)
-applog.setLevel(logging.DEBUG)
 
 """
 create some required folders to store log and transaction file
@@ -37,16 +24,31 @@ try:
     if not os.path.exists(os.path.dirname(DB_NAME)):
         os.mkdir(os.path.dirname(DB_NAME))
 except Exception as e:
-    applog.exception('Error creating the required folders: %s' % e)
+    print('Error creating the required folders: %s' % e)
     sys.exit(1)
 
+"""
+Set up logging
+"""
+handler = logging.handlers.WatchedFileHandler(LOG_FILE)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+applog = logging.getLogger('airdrops')
+applog.addHandler(handler)
+applog.setLevel(logging.DEBUG)
+
+
+"""
+Create the Flask application
+"""
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['UPLOAD_FOLDER'] = FILES_PATH
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
-api = Api(app, version='0.1', title='Tosidrop API', description='A simple API for tosidrop',)
-ns = api.namespace('api/v0', description='Tosidrop api v0')
+api = Api(app, version='0.1', title=APP_NAME, description=APP_DESCRIPTION,)
+ns = api.namespace('api/' + APP_VERSION, description=APP_NAME + ' ' + APP_VERSION)
 
 airdrop_parser = reqparse.RequestParser()
 airdrop_parser.add_argument('airdrop_file', type=FileStorage, location=FILES_PATH, required=True)
@@ -165,31 +167,25 @@ class EventValidate(Resource):
             msg['error'] = 'Spending more than existing amounts is not possible!'
             return msg, 406
         else:
-            extra_ada = int(len(airdrops_list) / ADDRESSES_PER_TRANSACTION * (860000 + EXTRA_LOVELACE) / 1000000 + 1)
-            extra_lovelace = len(airdrops_list) / ADDRESSES_PER_TRANSACTION * 680000
+            extra_lovelace = len(airdrops_list) * 4725
             applog.info('Airdrop is possible - available amounts are more than the amounts to spend.')
             if ceil(len(airdrops_list) / ADDRESSES_PER_TRANSACTION) > 1:
-                # we need more transactions
-                applog.info('Required transactions count: %d' %
-                            (1 + ceil(len(airdrops_list) / ADDRESSES_PER_TRANSACTION)))
+                transaction_count = (1 + ceil(len(airdrops_list) / ADDRESSES_PER_TRANSACTION))
             else:
-                applog.info('Required transactions count: 1')
-            if spend_amounts['lovelace'] + extra_ada * 1000000 > tokens_amounts['lovelace']:
-                applog.error('Please be sure there are about %d extra ADA in the source address.\n' % extra_ada)
+                transaction_count = 1
+            applog.info('Required transactions count: %d' % transaction_count)
+            if spend_amounts['lovelace'] + extra_lovelace > tokens_amounts['lovelace']:
+                applog.error('Please be sure there are about %f extra ADA in the source address.\n' %
+                             int(188500 * transaction_count + extra_lovelace))
         applog.info('source_transactions: %s\n' % source_transactions)
 
         msg = {}
         msg['spend_amounts'] = spend_amounts
         msg['available_amounts'] = tokens_amounts
-        if ceil(len(airdrops_list) / ADDRESSES_PER_TRANSACTION) > 1:
-            msg['transactions_count'] = (1 + ceil(len(airdrops_list) / ADDRESSES_PER_TRANSACTION))
-        else:
-            msg['transactions_count'] = 1
+        msg['transactions_count'] = transaction_count
         msg['message'] = 'Airdrop is possible - available amounts are more than the amounts to spend. '
-        msg['message'] += 'Estimated transaction fee: %d lovelace' % (extra_ada * 1000000)
-        msg['tx_fee'] = int(155000 + extra_lovelace)
+        msg['tx_fee'] = int(188500 * transaction_count + extra_lovelace)
         resp = make_response(msg)
-        resp.headers['Access-Control-Allow-Origin'] = '*'
         resp.headers['Content-Type'] = 'application/json'
         return resp
 
@@ -529,13 +525,9 @@ class EventSubmit(Resource):
             cbor_transaction['description'] = txid
 
             resp = make_response(cbor_transaction)
-            resp.headers['Access-Control-Allow-Origin'] = '*'
-            resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
-                                                           'Cache-Control,Content-Type,Range'
             resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'Single-Transaction'
             resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
-            resp.headers['Transaction-Id'] = txid
             return resp
 
         else:
@@ -721,13 +713,9 @@ class EventSubmit(Resource):
             cbor_transaction['description'] = txid
 
             resp = make_response(cbor_transaction)
-            resp.headers['Access-Control-Allow-Origin'] = '*'
-            resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
-                                                           'Cache-Control,Content-Type,Range'
             resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'UTxO-Create-Transaction'
             resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
-            resp.headers['Transaction-Id'] = txid
             resp.headers['Airdrop-Hash'] = airdrop_hash
             return resp
 
@@ -874,9 +862,6 @@ class EventSubmitTransaction(Resource):
         msg['transaction_id'] = txid
         msg['status'] = 'transaction %s submitted' % old_txid
         resp = make_response(msg)
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
-                                                       'Cache-Control,Content-Type,Range'
         resp.headers['Content-Type'] = 'application/json'
         return resp
 
@@ -887,10 +872,15 @@ class EventSubmitTransaction(Resource):
 @api.response(HTTPStatus.SERVICE_UNAVAILABLE.value, "Server error")
 @api.doc(parser=transaction_parser)
 class EventGetTransaction(Resource):
-    def get(self, airdrop_hash, transaction_nr):
+    def get(self, airdrop_hash, transaction_nr=0):
         """
         Get the transaction in cbor format
         """
+        if transaction_nr == 0:
+            applog.debug('get all transactions')
+        else:
+            applog.debug('get transaction_%d' % transaction_nr)
+
         conn = sqlite3.connect(DB_NAME)
         cur = conn.cursor()
         cur.execute("SELECT t.id, t.airdrop_id, t.name, t.status, t.date, a.hash, "
@@ -1053,16 +1043,12 @@ class EventGetTransaction(Resource):
                          trans_filename_prefix + '.signed')
             applog.exception(exc)
 
-        chor_transaction['description'] = txid
+        cbor_transaction['description'] = txid
 
         resp = make_response(cbor_transaction)
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Headers'] = 'DNT,User-Agent,X-Requested-With,If-Modified-Since,' \
-                                                       'Cache-Control,Content-Type,Range'
         resp.headers['Content-Type'] = 'application/json'
         resp.headers['Transaction-Type'] = 'airdrop_transaction_' + str(transaction_nr)
         resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
-        resp.headers['Transaction-Id'] = txid
         resp.headers['Airdrop-Hash'] = airdrop_hash
         return resp
 
