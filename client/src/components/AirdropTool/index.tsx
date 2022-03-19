@@ -224,8 +224,8 @@ export default function AirdropTool() {
       addressContainingAda
     );
       //debugging for tom
-    const airdropJson = JSON.stringify(requestBody, null, 2);
-    console.log(airdropJson);
+    //const airdropJson = JSON.stringify(requestBody, null, 2);
+    //console.log(airdropJson);
       ///
     const url = process.env.REACT_APP_API_TX;
 
