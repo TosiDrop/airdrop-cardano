@@ -235,7 +235,8 @@ def get_transactions(address, max_utxos=MAX_IN_UTXOS):
 def get_airdrop_details(cur, airdrop_id):
     """
     Return all the details about an airdrop from the database
-    :param airdrop_id:
+    :param cur: Database cursor
+    :param airdrop_id: Airdrop hash
     :return: a disctionary with all the airdrop details
     """
     airdrop_details = {}
@@ -370,11 +371,4 @@ def cardano_cli_cmd(cmd):
         stderr=subprocess.PIPE).communicate()
     out = out.decode('utf-8')
     err = err.decode('utf-8')
-    """
-    if err and 'Warning' not in err and 'Ok.' not in err:
-        print(cmd)
-        print(err)
-        sys.exit(1)
-    """
     return out, err
-

@@ -128,9 +128,9 @@ The result will have the following format:
 }
 ```
 
-### Get transaction
-In a multi-transaction airdrop, once the first transaction was adopted, the `/api/v0/submit` GET endpoint will be used to generate the next airdrop transactions. 
-It can be used after the "status" in the `/api/v0/aidrop_status` changes to "utxo transaction adopted".
+### Get transactions
+In a multi-transaction airdrop, once the first transaction was adopted, the `/api/v0/get_transactions` GET endpoint will be used to generate the airdrop transactions. It will return the list of transactions required for the airdrop to be performed. The transactions must be signed by the front-end and sent to the `/api/v0/submit` endpoint one by one. It is not required to make pause between transactions.
+It can be used only after the "status" in the `/api/v0/aidrop_status` changes to "utxo transaction adopted".
 
 ```json
 {
@@ -138,6 +138,5 @@ It can be used after the "status" in the `/api/v0/aidrop_status` changes to "utx
     "status": "utxo transaction adopted",
 
 ```
-The request has the following format: `/api/v0/get_transaction/203b1618fea8cce4453788749fb48ef735f19452debb7c2ecb9a50d0a49b0bf8/1`
-where the first URL parameter is the airdrop hash, as returned by the `/api/v0/submit` endpoint in the `Airdrop-Hash` header, and the `1` is the number of the transaction in this airdrop (the total number of transactions can be seen in the `/api/v0/aidrop_status` endpoint).
-The endpoint will return a CBOR transaction that needs to be signed and submitter to the `/api/v0/submit_transaction` endpoint.
+The request has the following format: `/api/v0/get_transaction/203b1618fea8cce4453788749fb48ef735f19452debb7c2ecb9a50d0a49b0bf8`
+where the first URL parameter is the airdrop hash, as returned by the `/api/v0/submit` endpoint in the `Airdrop-Hash` header.

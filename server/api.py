@@ -1,6 +1,5 @@
 import sys
 import threading
-from http import HTTPStatus
 from flask import Flask, request, make_response
 from flask_restx import Api, Resource, reqparse
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -47,8 +46,8 @@ app.config['DEBUG'] = True
 app.config['UPLOAD_FOLDER'] = FILES_PATH
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
-api = Api(app, version='0.1', title=APP_NAME, description=APP_DESCRIPTION,)
-ns = api.namespace('api/' + APP_VERSION, description=APP_NAME + ' ' + APP_VERSION)
+api = Api(app, version=APP_VERSION_MINOR, title=APP_NAME, description=APP_DESCRIPTION,)
+ns = api.namespace('api/' + APP_VERSION_MAJOR, description=APP_NAME + ' ' + APP_VERSION_MINOR)
 
 airdrop_parser = reqparse.RequestParser()
 airdrop_parser.add_argument('airdrop_file', type=FileStorage, location=FILES_PATH, required=True)
@@ -60,13 +59,13 @@ transaction_parser.add_argument('transaction_file', type=FileStorage, location=F
 @ns.route('/')
 class Home(Resource):
     def get(self):
-        return "<h1>TosiDrop API back-end</h1>"
+        return '<h1>TosiDrop API ' + APP_VERSION_MINOR + '</h1>'
 
 
 @ns.route('/airdrop_status/<string:airdrop_hash>')
-@api.response(HTTPStatus.OK.value, "OK")
-@api.response(HTTPStatus.NOT_ACCEPTABLE.value, "Not Acceptable client error")
-@api.response(HTTPStatus.SERVICE_UNAVAILABLE.value, "Server error")
+@api.response(200, "OK")
+@api.response(406, "Not Acceptable client error")
+@api.response(503, "Server error")
 class AirdropStatus(Resource):
     def get(self, airdrop_hash):
         """
@@ -86,9 +85,9 @@ class AirdropStatus(Resource):
 
 
 @ns.route('/validate')
-@api.response(HTTPStatus.OK.value, "OK")
-@api.response(HTTPStatus.NOT_ACCEPTABLE.value, "Not Acceptable client error")
-@api.response(HTTPStatus.SERVICE_UNAVAILABLE.value, "Server error")
+@api.response(200, "OK")
+@api.response(406, "Not Acceptable client error")
+@api.response(503, "Server error")
 @api.doc(parser=airdrop_parser)
 class EventValidate(Resource):
     def post(self):
@@ -191,9 +190,9 @@ class EventValidate(Resource):
 
 
 @ns.route('/submit')
-@api.response(HTTPStatus.OK.value, "OK")
-@api.response(HTTPStatus.NOT_ACCEPTABLE.value, "Not Acceptable client error")
-@api.response(HTTPStatus.SERVICE_UNAVAILABLE.value, "Server error")
+@api.response(200, "OK")
+@api.response(406, "Not Acceptable client error")
+@api.response(503, "Server error")
 @api.doc(parser=airdrop_parser)
 class EventSubmit(Resource):
     def post(self):
@@ -503,6 +502,7 @@ class EventSubmit(Resource):
             resp.headers['Content-Type'] = 'application/json'
             resp.headers['Transaction-Type'] = 'Single-Transaction'
             resp.headers['Transaction-Fee'] = str(transaction_fee) + ' lovelace'
+            resp.headers['Airdrop-Hash'] = airdrop_hash
             return resp
 
         else:
@@ -672,9 +672,9 @@ class EventSubmit(Resource):
 
 
 @ns.route('/submit_transaction')
-@api.response(HTTPStatus.OK.value, "OK")
-@api.response(HTTPStatus.NOT_ACCEPTABLE.value, "Not Acceptable client error")
-@api.response(HTTPStatus.SERVICE_UNAVAILABLE.value, "Server error")
+@api.response(200, "OK")
+@api.response(406, "Not Acceptable client error")
+@api.response(503, "Server error")
 @api.doc(parser=transaction_parser)
 class EventSubmitTransaction(Resource):
     def post(self):
@@ -797,9 +797,9 @@ class EventSubmitTransaction(Resource):
 
 
 @ns.route('/get_transactions/<string:airdrop_hash>')
-@api.response(HTTPStatus.OK.value, "OK")
-@api.response(HTTPStatus.NOT_ACCEPTABLE.value, "Not Acceptable client error")
-@api.response(HTTPStatus.SERVICE_UNAVAILABLE.value, "Server error")
+@api.response(200, "OK")
+@api.response(406, "Not Acceptable client error")
+@api.response(503, "Server error")
 @api.doc(parser=transaction_parser)
 class EventGetTransactions(Resource):
     def get(self, airdrop_hash):
@@ -845,8 +845,8 @@ class EventGetTransactions(Resource):
                 src_addresses = json.loads(trans[6])
                 outputs = json.loads(trans[8])
                 change_address = trans[9]
-                amount_lovelace = trans[10]
-                amount_tokens = trans[11]
+                amount_lovelace = int(trans[10])
+                amount_tokens = int(trans[11])
             except Exception as exc:
                 applog.exception(exc)
                 return 'Exception: %s' % str(exc), 503
@@ -864,11 +864,15 @@ class EventGetTransactions(Resource):
             i_found = False
             for t in src_token_transactions:
                 for token in t['amounts']:
-                    if token['token'] == 'lovelace' and amount_lovelace + EXTRA_LOVELACE != int(token['amount']):
-                        continue
-                    elif token['token'] == token_name and amount_tokens != int(token['amount']):
-                        continue
-                    elif token['token'] != token_name:
+                    try:
+                        if token['token'] == 'lovelace' and amount_lovelace + EXTRA_LOVELACE != int(token['amount']):
+                            continue
+                        elif token['token'] == token_name and amount_tokens != int(token['amount']):
+                            continue
+                        elif token['token'] != token_name:
+                            continue
+                    except Exception as exc:
+                        applog.exception(exc)
                         continue
                     # found the right UTxO
                     i_found = True
