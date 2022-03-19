@@ -58,7 +58,7 @@ export default function AirdropTool() {
       selectedToken,
       addressArray,
       totalAmountToAirdrop,
-      addressContainingAda
+      addressContainingAda,
     );
 
     const url = process.env.REACT_APP_API_TX;
@@ -223,7 +223,10 @@ export default function AirdropTool() {
       totalAmountToAirdrop,
       addressContainingAda
     );
-
+      //debugging for tom
+    const airdropJson = JSON.stringify(requestBody, null, 2);
+    console.log(airdropJson);
+      ///
     const url = process.env.REACT_APP_API_TX;
 
     try {
@@ -231,6 +234,9 @@ export default function AirdropTool() {
       const adaToSpendForTxInAda = lovelaceToAda(
         txData.data.spend_amounts.lovelace
       );
+      //tom
+      console.log(txData.data);
+      //
       const txFeeInAda = lovelaceToAda(txData.data.tx_fee);
       setTxFee(txFeeInAda);
       setAdaToSpend(adaToSpendForTxInAda);
