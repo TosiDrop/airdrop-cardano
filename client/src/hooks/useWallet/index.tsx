@@ -1,3 +1,4 @@
+import usePopUp from "hooks/usePopUp";
 import { useDispatch } from "react-redux";
 import {
   setAddressContainingAda,
@@ -22,6 +23,7 @@ let Buffer = require("buffer").Buffer;
 
 export default function useWallet() {
   const dispatch = useDispatch();
+  const { setPopUpError } = usePopUp();
 
   /**
    * enable connection to wallet
@@ -32,13 +34,7 @@ export default function useWallet() {
       const API = await connectWallet(walletName);
       dispatch(setApi(API));
     } catch (err: any) {
-      dispatch(
-        setPopUp({
-          type: PopUpType.FAIL,
-          text: "No account set. Enable Dapp account.",
-          show: true,
-        })
-      );
+      setPopUpError("No account set. Enable Dapp account.");
     }
   };
 

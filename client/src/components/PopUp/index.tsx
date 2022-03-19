@@ -1,12 +1,11 @@
 import useDualThemeClass from "hooks/useDualThemeClass";
 import Logo from "assets/logo.png";
-import { PopUpType, PopUpProps } from "utils";
-import "./index.scss";
+import { PopUpType } from "utils";
 import { Button } from "@arco-design/web-react";
 import { IconCheckCircle, IconCloseCircle } from "@arco-design/web-react/icon";
-import { closePopUp } from "reducers/globalSlice";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
-import { useEffect } from "react";
+import "./index.scss";
+import usePopUp from "hooks/usePopUp";
 
 const CONTAINER_CLASS = "popup";
 
@@ -14,6 +13,7 @@ export default function PopUp() {
   const dispatch = useDispatch();
   const { popUp } = useSelector((state: RootStateOrAny) => state.global);
   const { show, text, type } = popUp;
+  const { closePopUp } = usePopUp();
 
   const [CLASS, EL_CLASS] = useDualThemeClass({
     main: CONTAINER_CLASS,
@@ -57,7 +57,7 @@ export default function PopUp() {
       <div className={`${CLASS} ${getVisibilityClass(show, CONTAINER_CLASS)}`}>
         <h2>{text}</h2>
         {getSymbol(type)}
-        <Button onClick={() => dispatch(closePopUp())} className={EL_CLASS}>
+        <Button onClick={() => closePopUp()} className={EL_CLASS}>
           Close
         </Button>
       </div>

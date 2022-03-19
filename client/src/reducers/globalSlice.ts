@@ -66,9 +66,6 @@ export const globalSlice = createSlice({
     setPopUp: (state, { payload }: PayloadAction<PopUpProps>) => {
       state.popUp = { ...payload };
     },
-    closePopUp: (state) => {
-      state.popUp = { ...state.popUp, show: false };
-    },
   },
 });
 
@@ -83,7 +80,6 @@ export const {
   setWalletAddress,
   setAddressContainingAda,
   setPopUp,
-  closePopUp,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

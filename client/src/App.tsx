@@ -14,10 +14,11 @@ import {
 import { setWalletAddress, setPopUp } from "reducers/globalSlice";
 import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
 import { Buffer } from "buffer";
-import { PopUpType } from "utils";
+import usePopUp from "hooks/usePopUp";
 import "App.scss";
 
 function App() {
+  const { setPopUpError } = usePopUp();
   const CONTAINER_CLASS = useDualThemeClass({ main: "container", el: "" })[0];
   const dispatch = useDispatch();
   const api = useSelector((state: RootStateOrAny) => state.global.api);
@@ -65,13 +66,7 @@ function App() {
           dispatch(setWalletAddress(address));
         }
       } catch (err: any) {
-        dispatch(
-          setPopUp({
-            show: true,
-            type: PopUpType.FAIL,
-            text: err.message,
-          })
-        );
+        setPopUpError(err.message);
       }
 
       await getTokenArrayInWallet(api);

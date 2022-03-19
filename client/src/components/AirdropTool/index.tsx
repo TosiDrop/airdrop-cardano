@@ -12,16 +12,17 @@ import {
   PopUpType,
   lovelaceToAda,
 } from "utils";
-import { closePopUp, setPopUp } from "reducers/globalSlice";
 import { useState } from "react";
 import axios from "axios";
 import "./index.scss";
+import usePopUp from "hooks/usePopUp";
 
 const COMPONENT_CLASS = "airdrop-tool";
 
 export default function AirdropTool() {
   const dispatch = useDispatch();
 
+  const { setPopUpLoading, setPopUpSuccess, setPopUpError } = usePopUp();
   const [txFee, setTxFee] = useState(0);
   const [adaToSpend, setAdaToSpend] = useState(0);
   const [isAbleToAirdrop, setTsAbleToAirdrop] = useState(false);
@@ -40,13 +41,7 @@ export default function AirdropTool() {
   } = useSelector((state: RootStateOrAny) => state.global);
 
   const sendToken = async () => {
-    dispatch(
-      setPopUp({
-        show: true,
-        type: PopUpType.LOADING,
-        text: `Sending ${totalAmountToAirdrop} ${selectedToken.name}`,
-      })
-    );
+    setPopUpLoading(`Sending ${totalAmountToAirdrop} ${selectedToken.name}`);
 
     const requestBody = prepareBody(
       walletAddress,
@@ -71,13 +66,7 @@ export default function AirdropTool() {
   };
 
   const validateAirdropRequest = async () => {
-    dispatch(
-      setPopUp({
-        show: true,
-        type: PopUpType.LOADING,
-        text: "Validating request",
-      })
-    );
+    setPopUpLoading("Validating request");
 
     const requestBody = prepareBody(
       walletAddress,
@@ -98,23 +87,13 @@ export default function AirdropTool() {
       setTxFee(txFeeInAda);
       setAdaToSpend(adaToSpendForTxInAda);
       setTsAbleToAirdrop(true);
-      dispatch(
-        setPopUp({
-          show: true,
-          type: PopUpType.SUCCESS,
-          text: `Airdrop is validated. You can proceed with the airdrop.`,
-        })
+      setPopUpSuccess(
+        `Airdrop is validated. You can proceed with the airdrop.`
       );
     } catch (e: any) {
       switch (e.response?.status) {
         case 406: {
-          dispatch(
-            setPopUp({
-              show: true,
-              type: PopUpType.FAIL,
-              text: "Balance in wallet is not enough",
-            })
-          );
+          setPopUpError("Balance in wallet is not enough");
           return;
         }
       }
