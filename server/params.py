@@ -1,6 +1,10 @@
 import os
 env = dict(os.environ)
 
+# general settings
+APP_NAME = os.getenv('APP_NAME', 'Tosidrop API')
+APP_DESCRIPTION = os.getenv('APP_DESCRIPTION', 'A simple API for Tosidrop')
+APP_VERSION = os.getenv('APP_VERSION', 'v0')
 
 # the folder where the addresses files and spending key files are stored
 KEYS_PATH = os.getenv('KEYS_PATH', 'wallet')
