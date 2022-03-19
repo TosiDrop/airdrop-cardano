@@ -1,62 +1,75 @@
-import { Button, InputNumber } from "@arco-design/web-react";
-import { IconSend } from "@arco-design/web-react/icon";
-import { useState } from "react";
 import { useSelector, RootStateOrAny } from "react-redux";
+import { Button } from "@arco-design/web-react";
+import { IconSend } from "@arco-design/web-react/icon";
 import "./index.scss";
 
 const COMPONENT_CLASS = "token-detail";
 
-export default function TokenDetail() {
-  const [tokenPerWallet, setTokenPerWallet] = useState(0);
-  const { selectedToken, addressArray } = useSelector(
+interface Props {
+  sendToken: Function;
+  validateAirdropRequest: Function;
+  adaToSpend: Number;
+  fee: number;
+  isAbleToAirdrop: boolean;
+}
+
+export default function TokenDetail({
+  sendToken,
+  adaToSpend,
+  fee,
+  validateAirdropRequest,
+  isAbleToAirdrop,
+}: Props) {
+  const { selectedToken, addressArray, totalAmountToAirdrop } = useSelector(
     (state: RootStateOrAny) => state.global
   );
 
   const addressArrayLength = addressArray.length;
-  const totalTokenToBeAirdropped = tokenPerWallet * addressArrayLength;
-
-  const sendToken = () => {
-    console.log(`Sending ${totalTokenToBeAirdropped} ${selectedToken.name}...`);
-  };
 
   return (
     <div className={COMPONENT_CLASS}>
       <div className={`${COMPONENT_CLASS}__row`}>
-        <span>Tokens per wallet</span>
-        <InputNumber
-          min={0}
-          defaultValue={tokenPerWallet}
-          step={1}
-          precision={2}
-          onChange={setTokenPerWallet}
-        />
-      </div>
-      <div className={`${COMPONENT_CLASS}__row`}>
         <span>Balance in wallet</span>
         <span>
-          {(selectedToken.amount / 1000000).toFixed(2)} {selectedToken.name}
+          {(
+            selectedToken.amount / Math.pow(10, selectedToken.decimals)
+          ).toFixed(2)}{" "}
+          {selectedToken.name}
         </span>
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
         <span>Total tokens to be airdropped</span>
         <span>
-          {totalTokenToBeAirdropped} {selectedToken.name}
+          {totalAmountToAirdrop} {selectedToken.name}
         </span>
       </div>
-      <div className={`${COMPONENT_CLASS}__row`}>
-        <span>Fee</span>
-        <span>0.3 ADA</span>
-      </div>
+      {isAbleToAirdrop ? (
+        <>
+          <div className={`${COMPONENT_CLASS}__row`}>
+            <span>Total ADA to spend</span>
+            <span>{adaToSpend} ADA</span>
+          </div>
+          <div className={`${COMPONENT_CLASS}__row`}>
+            <span>Estimated transaction fee</span>
+            <span>{fee} ADA</span>
+          </div>
+        </>
+      ) : null}
       <div className={`${COMPONENT_CLASS}__row`}>
         <Button
-          onClick={sendToken}
+          onClick={() => validateAirdropRequest()}
           disabled={
-            tokenPerWallet === 0 ||
-            typeof tokenPerWallet !== "number" ||
+            totalAmountToAirdrop === 0 ||
             selectedToken.name === "" ||
-            addressArrayLength === 0
+            addressArrayLength === 0 ||
+            isAbleToAirdrop
           }
         >
+          Validate Airdrop
+        </Button>
+      </div>
+      <div className={`${COMPONENT_CLASS}__row`}>
+        <Button onClick={() => sendToken()} disabled={!isAbleToAirdrop}>
           Airdrop
           <IconSend />
         </Button>

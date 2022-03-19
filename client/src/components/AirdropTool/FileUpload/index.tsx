@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
+import { useDispatch } from "react-redux";
 import { Upload, Button } from "@arco-design/web-react";
 import { UploadItem } from "@arco-design/web-react/es/Upload";
-import { useDispatch } from "react-redux";
-import { updateAddressArray } from "reducers/globalSlice";
+import { setAddressArray } from "reducers/globalSlice";
+import { AddressAmount } from "utils";
 import "./index.scss";
 
 export default function FileUpload() {
@@ -14,10 +15,9 @@ export default function FileUpload() {
     const file = fileList[0].originFile as Blob;
     reader.readAsText(file);
     reader.onload = function () {
-      let addresses = reader.result as string;
-      const addressArray = addresses!.split("\r\n");
-      if (addressArray[addressArray.length - 1] === "") addressArray.pop();
-      dispatch(updateAddressArray(addressArray));
+      const addressAmountParsed = csvToArray(reader.result as string);
+      const addressAmountArray = splitAmountArray(addressAmountParsed);
+      dispatch(setAddressArray(addressAmountArray));
     };
   }, [dispatch, fileList]);
 
@@ -37,4 +37,24 @@ export default function FileUpload() {
       <Button>Add addresses</Button>
     </Upload>
   );
+}
+
+function csvToArray(csv: string): string[] {
+  csv = csv.replaceAll('\r', '') // for windows line ending
+  const parsedCsv = csv.split("\n");
+  if (parsedCsv[parsedCsv.length - 1] === "") parsedCsv.pop();
+  return parsedCsv;
+}
+
+function splitAmountArray(addressAmountParsed: string[]): AddressAmount[] {
+  const res: AddressAmount[] = [];
+  let temp: string[] = [];
+  for (let addressAmountInfo of addressAmountParsed) {
+    temp = addressAmountInfo.split(",");
+    res.push({
+      address: temp[0],
+      amount: Number(Number(temp[1])),
+    });
+  }
+  return res;
 }

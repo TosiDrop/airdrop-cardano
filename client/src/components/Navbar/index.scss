@@ -10,6 +10,8 @@
   &__button {
     box-shadow: var(--std-box-shadow) !important;
     height: var(--navbar-el-height) !important;
+    display: flex !important;
+    align-items: center;
   }
 
   & > * {
@@ -34,6 +36,7 @@
   &__logo {
     height: var(--navbar-el-height);
     margin-right: auto;
+    margin-left: var(--std-separator-width);
   }
 }
 
@@ -50,5 +53,32 @@
     background: var(--lt-btn-color) !important;
     border-width: 0px !important;
     color: var(--dt-color) !important;
+  }
+}
+
+.lds-dual-ring {
+  display: inline-block;
+  box-sizing: border-box;
+  margin-left: var(--std-separator-width);
+}
+
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  border-color: #fff transparent #fff transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }

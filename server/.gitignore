@@ -1,0 +1,6 @@
+files
+db
+transactions
+*wallet*
+*.json
+__pycache__
