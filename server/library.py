@@ -17,7 +17,7 @@ def parse_airdrop_data(data):
     token_name = ''
     try:
         json_data = json.loads(data)
-        source_addresses = json_data['source_addresses']
+        source_addresses = list(set(json_data['source_addresses']))
         token_name = json_data['token_name']
         if 'change_address' in json_data:
             change_address = json_data['change_address']
