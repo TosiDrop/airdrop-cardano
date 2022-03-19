@@ -4,13 +4,11 @@ import {
   setAddressContainingAda,
   setTokenArray,
   setApi,
-  setPopUp,
 } from "reducers/globalSlice";
 import {
   AddressAmount,
   PolicyIDAndAssetNameToAddressAmountMap,
   PolicyIDAndAssetNameToAmountMap,
-  PopUpType,
 } from "utils";
 import {
   connectWallet,
@@ -126,7 +124,7 @@ export default function useWallet() {
       dispatch(setAddressContainingAda(addressContainingAda));
       dispatch(setTokenArray(tokenArray));
     } catch (err) {
-      console.log(err);
+      setPopUpError("Something is wrong")
     }
   };
 
