@@ -100,10 +100,10 @@ export default function AirdropTool() {
       console.log(airdropHash);
        //get transaction status
 
-       //const airdropStatus = await axios.get(
-       //  `${url}/api/v0/airdrop_status/${airdropHash}`       
-       //);
-       //console.log(airdropStatus.data);
+       const airdropStatus = await axios.get(
+         `${url}/api/v0/airdrop_status/${airdropHash}`       
+       );
+       console.log(airdropStatus.data);
  
  
        //we need to check the above status until the tx is confirmed
@@ -127,8 +127,8 @@ export default function AirdropTool() {
       addressContainingAda
     );
       //debugging for tom
-    const airdropJson = JSON.stringify(requestBody, null, 2);
-    console.log(airdropJson);
+    //const airdropJson = JSON.stringify(requestBody, null, 2);
+    //console.log(airdropJson);
       ///
     const url = process.env.REACT_APP_API_TX;
 
