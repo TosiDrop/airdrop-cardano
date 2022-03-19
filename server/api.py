@@ -736,8 +736,13 @@ class EventSubmitTransaction(Resource):
             trans_id = trans[0]
             airdrop_id = trans[1]
             name = trans[2]
+            status = trans[4]
             airdrop_hash = trans[6]
             change_address = trans[7]
+
+            if status != 'transaction returned for signing':
+                # avoid multiple times transaction submission
+                return 'Invalid transaction status: %s' % status, 406
 
             # submit transaction to the local node
             if len(MAGIC_NUMBER) == 0:
@@ -809,13 +814,16 @@ class EventGetTransactions(Resource):
         conn = sqlite3.connect(DB_NAME)
         cur = conn.cursor()
 
-        cur.execute("SELECT max(id) from airdrops WHERE hash = ?", (airdrop_hash, ))
+        cur.execute("SELECT id, status from airdrops WHERE hash = ? ORDER BY id DESC LIMIT 1", (airdrop_hash, ))
         try:
             item = cur.fetchone()
             if not item:
                 return 'Airdrop not found', 406
             airdrop_id = item[0]
-            applog.debug(airdrop_id)
+            airdrop_status = item[1]
+            applog.debug('Airdrop id: %s, Status: %s' % (airdrop_id, airdrop_status))
+            if airdrop_status != 'utxo transaction adopted':
+                return 'Wait for the UTxO transaction to be adopted! Status now: %s' % airdrop_status, 406
         except Exception as exc:
             applog.exception(exc)
             return 'Exception: %s' % str(exc), 503
@@ -952,7 +960,7 @@ class EventGetTransactions(Resource):
             applog.info('Transaction ID: %s' % txid)
 
             now = datetime.datetime.now()
-            cur.execute("UPDATE transactions SET status = 'transaction created and signed', date = ?, hash = ? "
+            cur.execute("UPDATE transactions SET status = 'transaction returned for signing', date = ?, hash = ? "
                         "WHERE id = ?", (now, txid, trans_id))
             conn.commit()
 
