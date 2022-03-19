@@ -16,6 +16,8 @@ import { useState } from "react";
 import axios from "axios";
 import "./index.scss";
 import usePopUp from "hooks/usePopUp";
+import { Transaction, TransactionWitnessSet } from "@emurgo/cardano-serialization-lib-asmjs";
+const Buffer = require("buffer/").Buffer;
 
 const COMPONENT_CLASS = "airdrop-tool";
 
@@ -35,6 +37,7 @@ export default function AirdropTool() {
     totalAmountToAirdrop,
     walletAddress,
     addressContainingAda,
+    api
   } = useSelector((state: RootStateOrAny) => state.global);
 
   const sendToken = async () => {
@@ -45,8 +48,9 @@ export default function AirdropTool() {
       selectedToken,
       addressArray,
       totalAmountToAirdrop,
-      addressContainingAda
+      addressContainingAda,
     );
+   
     const url = process.env.REACT_APP_API_TX;
 
     try {
@@ -55,10 +59,57 @@ export default function AirdropTool() {
         requestBody
       );
       const cborHexInString = submitAirdrop.data;
-      /**
-       * Hi TOM! :)
-       * please continue here
-       */
+      
+      console.log(cborHexInString);
+      const txId = cborHexInString.description;
+       //convert tx body to bytes
+      const txCli = Transaction.from_bytes(Buffer.from(cborHexInString.cborHex, "hex"));
+       //begin signature
+      const txBody = txCli.body();
+      const witnessSet = txCli.witness_set();
+       //this clears the dummy signature from the transaction
+      witnessSet.vkeys()?.free();
+       //build new unsigned transaction
+      const transactionWitnessSet = TransactionWitnessSet.new();
+      const tx = Transaction.new(
+          txBody,
+          TransactionWitnessSet.from_bytes(transactionWitnessSet.to_bytes())
+      );
+              
+       //send to wallet for signature
+      let txVkeyWitnesses =  await api.signTx(Buffer.from(tx.to_bytes(), "utf8").toString("hex"), true);
+      txVkeyWitnesses = TransactionWitnessSet.from_bytes(Buffer.from(txVkeyWitnesses, "hex"));
+      transactionWitnessSet.set_vkeys(txVkeyWitnesses.vkeys());
+      const signedTx = Transaction.new(
+          tx.body(),
+          transactionWitnessSet
+      );
+       //convert back to string
+      const hexSigned = (Buffer.from(signedTx.to_bytes(), "utf8").toString("hex"));
+      const txFormatted = (`{ \n\t\"type\": \"Tx AlonzoEra\",\n\t\"description\": \"${txId}",\n\t\"cborHex\": \"${hexSigned}\"\n}`);
+       //console.log (txFormatted);
+      const txJson = JSON.parse(txFormatted);
+       //console.log (txJson);
+      const txSubmit = await axios.post(`${url}/api/v0/submit_transaction`, txJson);
+      console.log(txSubmit.data);
+      const airdropResponse = txSubmit.data;
+      const airdropHash = airdropResponse.airdrop_hash;
+      console.log(airdropHash);
+       //get transaction status
+
+       //const airdropStatus = await axios.get(
+       //  `${url}/api/v0/airdrop_status/${airdropHash}`       
+       //);
+       //console.log(airdropStatus.data);
+ 
+ 
+       //we need to check the above status until the tx is confirmed
+ 
+       //const getAirdrop = await axios.get(
+      //   `${url}/api/v0/get_transactions/${airdropHash}`       
+       //);
+       //console.log(getAirdrop.data);
+
     } catch (e: any) {}
   };
 
@@ -72,7 +123,10 @@ export default function AirdropTool() {
       totalAmountToAirdrop,
       addressContainingAda
     );
-
+      //debugging for tom
+    const airdropJson = JSON.stringify(requestBody, null, 2);
+    console.log(airdropJson);
+      ///
     const url = process.env.REACT_APP_API_TX;
 
     try {
@@ -80,6 +134,9 @@ export default function AirdropTool() {
       const adaToSpendForTxInAda = lovelaceToAda(
         txData.data.spend_amounts.lovelace
       );
+      //tom
+      console.log(txData.data);
+      //
       const txFeeInAda = lovelaceToAda(txData.data.tx_fee);
       setTxFee(txFeeInAda);
       setAdaToSpend(adaToSpendForTxInAda);
