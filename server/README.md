@@ -140,3 +140,35 @@ It can be used only after the "status" in the `/api/v0/aidrop_status` changes to
 ```
 The request has the following format: `/api/v0/get_transaction/203b1618fea8cce4453788749fb48ef735f19452debb7c2ecb9a50d0a49b0bf8`
 where the first URL parameter is the airdrop hash, as returned by the `/api/v0/submit` endpoint in the `Airdrop-Hash` header.
+
+
+### Error messages
+
+#### /api/v0/validate
+  - UNSUPPORTED_DATA_TYPE: the airdrop data is not in the correct format
+  - UNKNOWN_AVAILABLE_TOKENS: error when trying to see the available ADA and Tokens at the source addresses
+  - INVALID_SIGNING_KEY: error reading the configured signing
+  - MISSING_UTXOS: the source addresses have no UTxOs
+  - NOT_ENOUGH_ADA: there is not enough ADA for the airdrop at the source addresses
+  - NOT_ENOUGH_TOKENS: there are not enough tokens for the airdrop at the source addresses
+  - SERVER_ERROR: unknown server error
+
+#### /api/v0/submit
+  - UNSUPPORTED_DATA_TYPE: the airdrop data is not in the correct format
+  - UNKNOWN_AVAILABLE_TOKENS: error when trying to see the available ADA and Tokens at the source addresses
+  - INVALID_SIGNING_KEY: error reading the configured signing
+  - MISSING_UTXOS: the source addresses have no UTxOs
+  - NOT_ENOUGH_ADA: there is not enough ADA for the airdrop at the source addresses
+  - NOT_ENOUGH_TOKENS: there are not enough tokens for the airdrop at the source addresses
+  - SERVER_ERROR: unknown server error
+
+#### /api/v0/submit_transaction
+  - UNSUPPORTED_DATA_TYPE: the airdrop data is not in the correct format
+  - SERVER_ERROR: unknown server error
+  - TRANSACTION_NOT_FOUND: the submitted transaction was not found in the database
+
+#### /api/v0/get_transactions
+  - AIRDROP_NOT_FOUND: the airdrop was not found in the database
+  - INVALID_AIRDROP_STATUS: the endpoint cannot be called at this moment (probably the UTxO transaction was not yet adopted)
+  - SERVER_ERROR: unknown server error
+  - UTXO_NOT_FOUND: UTxO (created by the first transaction) not found for an airdrop transaction

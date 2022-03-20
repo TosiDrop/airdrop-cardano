@@ -107,21 +107,25 @@ class EventValidate(Resource):
                     applog.error('Unsupported data type')
                     msg = {}
                     msg['error'] = 'Unsupported data type'
+                    msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
                     return msg, 406
             else:
                 msg = {}
                 msg['error'] = 'Not Acceptable client error'
+                msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
                 return msg, 406
         except Exception as e:
             applog.exception(e)
             msg = {}
             msg['error'] = 'Not Acceptable client error'
+            msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
             return msg, 406
         src_addresses, change_address, airdrops_list, spend_amounts, dst_addresses, \
             token_name, amounts, out, err = parse_airdrop_data(data)
         if err:
             msg = {}
             msg['error'] = err
+            msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
             return msg, 406
         else:
             applog.info(out)
@@ -137,6 +141,7 @@ class EventValidate(Resource):
             applog.exception('Error reading SRC_KEYS %s: %s' % (SRC_KEYS, err))
             msg = {}
             msg['error'] = 'Error reading SRC_KEYS %s: %s' % (SRC_KEYS, err)
+            msg['CODE'] = 'INVALID_SIGNING_KEY'
             return msg, 503
 
         # get available amounts at the src_addresses
@@ -144,6 +149,9 @@ class EventValidate(Resource):
             err = get_available_amounts(src_addresses)
         if err:
             applog.error(err)
+            msg = {}
+            msg['error'] = err
+            msg['CODE'] = 'UNKNOWN_AVAILABLE_TOKENS'
             return err, 503
 
         # debug
@@ -151,7 +159,8 @@ class EventValidate(Resource):
             applog.error('No source transactions (UTXOs)!')
             msg = {}
             msg['error'] = 'No source transactions (UTXOs)!'
-            return msg, 503
+            msg['CODE'] = 'MISSING_UTXOS'
+            return msg, 406
         applog.info('Source transactions: %s' % src_transactions)
         applog.info('Source token transactions: %s' % src_token_transactions)
         applog.info('Amounts available: %s' % tokens_amounts)
@@ -164,6 +173,12 @@ class EventValidate(Resource):
             msg['spend_amounts'] = spend_amounts
             msg['available_amounts'] = tokens_amounts
             msg['error'] = 'Spending more than existing amounts is not possible!'
+            err_code = ''
+            if spend_amounts['lovelace'] > tokens_amounts['lovelace']:
+                err_code = 'NOT_ENOUGH_ADA'
+            elif spend_amounts[token_name] > tokens_amounts[token_name]:
+                err_code = 'NOT_ENOUGH_TOKENS'
+            msg['CODE'] = err_code
             return msg, 406
         else:
             extra_lovelace = len(airdrops_list) * 4725
@@ -184,6 +199,7 @@ class EventValidate(Resource):
         msg['transactions_count'] = transaction_count
         msg['message'] = 'Airdrop is possible - available amounts are more than the amounts to spend. '
         msg['tx_fee'] = int(188500 * transaction_count + extra_lovelace)
+        msg['CODE'] = 'OK'
         resp = make_response(msg)
         resp.headers['Content-Type'] = 'application/json'
         return resp
@@ -212,15 +228,18 @@ class EventSubmit(Resource):
                     applog.error('Unsupported data type')
                     msg = {}
                     msg['error'] = 'Unsupported data type'
+                    msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
                     return msg, 406
             else:
                 msg = {}
                 msg['error'] = 'Not Acceptable client error'
+                msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
                 return msg, 406
         except Exception as e:
             applog.exception(e)
             msg = {}
             msg['error'] = 'Not Acceptable client error'
+            msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
             return msg, 406
 
         airdrop_hash = hashlib.sha256(str(data).encode()).hexdigest()
@@ -230,6 +249,7 @@ class EventSubmit(Resource):
         if err:
             msg = {}
             msg['error'] = 'err'
+            msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
             return msg, 406
         else:
             applog.info(out)
@@ -246,6 +266,7 @@ class EventSubmit(Resource):
             applog.exception('Error reading SRC_KEYS %s: %s' % (SRC_KEYS, err))
             msg = {}
             msg['error'] = 'Error reading SRC_KEYS %s: %s' % (SRC_KEYS, err)
+            msg['CODE'] = 'INVALID_SIGNING_KEY'
             return msg, 503
 
         # get available amounts at the src_addresses
@@ -253,6 +274,7 @@ class EventSubmit(Resource):
             err = get_available_amounts(src_addresses)
         if err:
             applog.error(err)
+            msg['CODE'] = 'UNKNOWN_AVAILABLE_TOKENS'
             return err, 503
 
         # debug
@@ -260,7 +282,8 @@ class EventSubmit(Resource):
             applog.error('No source transactions (UTXOs)!')
             msg = {}
             msg['error'] = 'No source transactions (UTXOs)!'
-            return msg, 503
+            msg['CODE'] = 'MISSING_UTXOS'
+            return msg, 406
         applog.info('Source transactions: %s' % src_transactions)
         applog.info('Source token transactions: %s' % src_token_transactions)
         applog.info('Amounts available: %s' % tokens_amounts)
@@ -273,6 +296,12 @@ class EventSubmit(Resource):
             msg['spend_amounts'] = spend_amounts
             msg['available_amounts'] = tokens_amounts
             msg['error'] = 'Spending more than existing amounts is not possible!'
+            err_code = ''
+            if spend_amounts['lovelace'] > tokens_amounts['lovelace']:
+                err_code = 'NOT_ENOUGH_ADA'
+            elif spend_amounts[token_name] > tokens_amounts[token_name]:
+                err_code = 'NOT_ENOUGH_TOKENS'
+            msg['CODE'] = err_code
             return msg, 406
         else:
             extra_ada = int(len(airdrops_list) / ADDRESSES_PER_TRANSACTION * (860000 + EXTRA_LOVELACE) / 1000000 + 1)
@@ -288,12 +317,14 @@ class EventSubmit(Resource):
         if err and 'Warning' not in err and 'Ok.' not in err:
             msg = {}
             msg['error'] = err.strip()
+            msg['CODE'] = 'SERVER_ERROR'
             return msg, 503
 
         out, err = get_tip()
         if err and 'Warning' not in err and 'Ok.' not in err:
             msg = {}
             msg['error'] = err.strip()
+            msg['CODE'] = 'SERVER_ERROR'
             return msg, 503
         # set transaction expire time in TRANSACTION_EXPIRE seconds (default 86400 = 1 day)
         expire = json.loads(out)['slot'] + TRANSACTION_EXPIRE
@@ -437,6 +468,7 @@ class EventSubmit(Resource):
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
             applog.info(out)
             transaction_fee = out.strip().split(' ')[-1]
@@ -449,6 +481,7 @@ class EventSubmit(Resource):
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
             txid = out.strip()
             applog.info('Transaction ID: %s' % txid)
@@ -474,6 +507,7 @@ class EventSubmit(Resource):
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
             """
             Update the transaction status - signed
@@ -574,6 +608,7 @@ class EventSubmit(Resource):
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
             applog.info(out)
             transaction_fee = out.strip().split(' ')[-1]
@@ -586,6 +621,7 @@ class EventSubmit(Resource):
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
             txid = out.strip()
             applog.info('Transaction ID: %s' % txid)
@@ -611,6 +647,7 @@ class EventSubmit(Resource):
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
             """
             Update the transaction status - signed
@@ -696,15 +733,18 @@ class EventSubmitTransaction(Resource):
                     applog.error('Unsupported data type')
                     msg = {}
                     msg['error'] = 'Unsupported data type'
+                    msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
                     return msg, 406
             else:
                 msg = {}
                 msg['error'] = 'Not Acceptable client error'
+                msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
                 return msg, 406
         except Exception as e:
             applog.exception(e)
             msg = {}
             msg['error'] = 'Not Acceptable client error'
+            msg['CODE'] = 'UNSUPPORTED_DATA_TYPE'
             return msg, 406
 
         # transaction ID received after being signed
@@ -718,6 +758,7 @@ class EventSubmitTransaction(Resource):
             applog.error(err)
             msg = {}
             msg['error'] = 'Server error: %s' % err
+            msg['CODE'] = 'SERVER_ERROR'
             return msg, 503
         txid = out.strip()
         applog.info('Received transaction ID: %s' % txid)
@@ -767,6 +808,7 @@ class EventSubmitTransaction(Resource):
                 conn.commit()
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
 
         except Exception as exc:
@@ -774,7 +816,8 @@ class EventSubmitTransaction(Resource):
             applog.exception(exc)
             msg = {}
             msg['error'] = 'Transaction %s not found' % old_txid
-            return msg, 503
+            msg['CODE'] = 'TRANSACTION_NOT_FOUND'
+            return msg, 406
 
         """
         Transaction submitted successfully
@@ -818,15 +861,24 @@ class EventGetTransactions(Resource):
         try:
             item = cur.fetchone()
             if not item:
-                return 'Airdrop not found', 406
+                msg = {}
+                msg['error'] = 'Airdrop %s not found' % airdrop_hash
+                msg['CODE'] = 'AIRDROP_NOT_FOUND'
+                return msg, 406
             airdrop_id = item[0]
             airdrop_status = item[1]
             applog.debug('Airdrop id: %s, Status: %s' % (airdrop_id, airdrop_status))
             if airdrop_status != 'utxo transaction adopted':
-                return 'Wait for the UTxO transaction to be adopted! Status now: %s' % airdrop_status, 406
+                msg = {}
+                msg['error'] = 'Invalid airdrop status: %s' % airdrop_status
+                msg['CODE'] = 'INVALID_AIRDROP_STATUS'
+                return msg, 406
         except Exception as exc:
             applog.exception(exc)
-            return 'Exception: %s' % str(exc), 503
+            msg = {}
+            msg['error'] = str(exc)
+            msg['CODE'] = 'SERVER_ERROR'
+            return msg, 503
 
         cur.execute("SELECT t.id, t.airdrop_id, t.name, t.status, t.date, a.hash, "
                     "td.src_addresses, td.inputs, td.outputs, td.change_address, "
@@ -838,10 +890,16 @@ class EventGetTransactions(Resource):
         try:
             transactions = cur.fetchall()
             if not transactions:
-                return 'Airdrop not found', 406
+                msg = {}
+                msg['error'] = 'Airdrop %s not found' % airdrop_hash
+                msg['CODE'] = 'AIRDROP_NOT_FOUND'
+                return msg, 406
         except Exception as exc:
             applog.exception(exc)
-            return 'Exception: %s' % str(exc), 503
+            msg = {}
+            msg['error'] = str(exc)
+            msg['CODE'] = 'SERVER_ERROR'
+            return msg, 503
 
         resp_transactions = []
         transaction_nr = 0
@@ -857,15 +915,20 @@ class EventGetTransactions(Resource):
                 amount_tokens = int(trans[11])
             except Exception as exc:
                 applog.exception(exc)
-                return 'Exception: %s' % str(exc), 503
+                msg = {}
+                msg['error'] = str(exc)
+                msg['CODE'] = 'SERVER_ERROR'
+                return msg, 503
 
             transaction_nr += 1
             # get available amounts at the src_addresses
             source_transactions, src_transactions, src_token_transactions, tokens_amounts, \
                 err = get_available_amounts(src_addresses)
             if err:
-                applog.error(err)
-                return err, 503
+                msg = {}
+                msg['error'] = str(err)
+                msg['CODE'] = 'SERVER_ERROR'
+                return msg, 503
 
             token_name = list(outputs[0].keys())[2]
             inputs = []
@@ -894,7 +957,10 @@ class EventGetTransactions(Resource):
                     break
 
             if not i_found:
-                return 'UTxO not found', 503
+                msg = {}
+                msg['error'] = 'UTxO not found'
+                msg['CODE'] = 'UTXO_NOT_FOUND'
+                return msg, 503
 
             out, err = get_tip()
             if err and 'Warning' not in err and 'Ok.' not in err:
@@ -931,6 +997,7 @@ class EventGetTransactions(Resource):
                 conn.commit()
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
             applog.info(out)
             transaction_fees += int(out.strip().split(' ')[-1])
@@ -945,6 +1012,7 @@ class EventGetTransactions(Resource):
                 conn.commit()
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
 
             # get the transaction id
@@ -955,6 +1023,7 @@ class EventGetTransactions(Resource):
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
+                msg['CODE'] = 'SERVER_ERROR'
                 return msg, 503
             txid = out.strip()
             applog.info('Transaction ID: %s' % txid)
