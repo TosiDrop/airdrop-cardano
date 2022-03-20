@@ -479,9 +479,9 @@ class EventSubmit(Resource):
             Update the transaction status - signed
             """
             now = datetime.datetime.now()
-            cur.execute("UPDATE transactions SET status = 'transaction signed', date = ? WHERE id = ?",
+            cur.execute("UPDATE transactions SET status = 'transaction returned for signing', date = ? WHERE id = ?",
                         (now, trans_id))
-            cur.execute("UPDATE airdrops SET status = 'single transaction signed', date = ? WHERE id = ?",
+            cur.execute("UPDATE airdrops SET status = 'single transaction returned for signing', date = ? WHERE id = ?",
                         (now, airdrop_id))
             conn.commit()
 
