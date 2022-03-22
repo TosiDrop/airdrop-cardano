@@ -29,6 +29,8 @@ def parse_airdrop_data(data):
             aird = {}
             aird['address'] = address
             aird['tokens_amount'] = amount
+            aird['token_name'] = token_name
+            aird['lovelace_amount'] = calculate_min_ada(token_name)
             airdrops_list.append(aird)
         out = 'json parsed'
     except Exception as e:
