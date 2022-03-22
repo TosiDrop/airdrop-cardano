@@ -16,12 +16,19 @@ import { useState } from "react";
 import axios from "axios";
 import "./index.scss";
 import usePopUp from "hooks/usePopUp";
-import { Transaction, TransactionWitnessSet } from "@emurgo/cardano-serialization-lib-asmjs";
+import {
+  Transaction,
+  TransactionWitnessSet,
+} from "@emurgo/cardano-serialization-lib-asmjs";
 import { resolve } from "node:path/win32";
 import { createNextState } from "@reduxjs/toolkit";
 import { sign } from "node:crypto";
+
+/// I added these two
+
 const Buffer = require("buffer/").Buffer;
-var multiTx = 'false'
+var multiTx = "false";
+
 const COMPONENT_CLASS = "airdrop-tool";
 
 export default function AirdropTool() {
@@ -43,7 +50,7 @@ export default function AirdropTool() {
     totalAmountToAirdrop,
     walletAddress,
     addressContainingAda,
-    api
+    api,
   } = useSelector((state: RootStateOrAny) => state.global);
 
   const sendToken = async () => {
@@ -54,298 +61,158 @@ export default function AirdropTool() {
       selectedToken,
       addressArray,
       totalAmountToAirdrop,
-      addressContainingAda,
+      addressContainingAda
     );
+
     const url = process.env.REACT_APP_API_TX;
-    console.log(multiTx)
-    console.log(requestBody)
+    /// Submit the first transaction after validation
     try {
       const submitAirdrop = await axios.post(
         `${url}/api/v0/submit`,
         requestBody
       );
       const cborHexInString = submitAirdrop.data.cborHex;
+      // the API uses the transaction id as a unique identifier.
+      // cardano serialization lib modifies it. We us the description
+      // field of the transaction json to pass along the original value.
+
       const txId = submitAirdrop.data.description;
-      //if (multiTx == "false") {
-      const cleared = await clearSignature(cborHexInString)
-      console.log(cleared)
-      const signed = await walletSign(cleared[0],cleared[1],txId)
-      console.log(signed)
-      const submitted = await submit_transaction(signed,url)
-      console.log(submitted.status)
+
+      // functions to  erase witnesses, sign, and submit to api
+      const cleared = await clearSignature(cborHexInString);
+      console.log(cleared);
+      const signed = await walletSign(cleared[0], cleared[1], txId);
+      console.log(signed);
+      const submitted = await submit_transaction(signed, url);
+      console.log(submitted.status);
+
+      //check single or multi transaction
       if (multiTx == "false") {
-        setPopUpSuccess(
-          `${submitted.status}`) 
-        }  else {
-          setPopUpLoading(`negotiating UTXOs...`);
-          //console.log(test.)
-          //console.log(test.airdrop_hash)
-          await checkAirdropStatus(url,submitted.airdrop_hash,txId)
-        }}
-       catch (e: any) {}
-    };
-
-      const sleep = (ms:number) => {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+        setPopUpSuccess(`${submitted.status}`);
+      } else {
+        setPopUpLoading(`negotiating UTXOs...`);
+        //console.log(test.)
+        //console.log(test.airdrop_hash)
+        await checkAirdropStatus(url, submitted.airdrop_hash, txId);
+      }
+    } catch (e: any) {}
   };
-  
-     const checkAirdropStatus = async (url:any,airdropHash:any,txId:any) => {
-       setPopUpLoading("waiting for initial confirmation");
-      
-       await axios.get(`${url}/api/v0/airdrop_status/${airdropHash}`).then((response) => {
-        
-        if(response.data.transactions[0].transaction_status == 'transaction submitted') {
-           console.log(response.data.transactions[0].transaction_status)  
-           sleep(5000).then(() => {
-         checkAirdropStatus(url, airdropHash, txId); 
-           }) 
-         }else{
-           console.log(response.data.transactions[0].transaction_status)
-           getAirdrop(url,airdropHash);
-         }
-        
-       })
-     };
+  //sleep function
+  const sleep = (ms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
+  //for a multi transaction we need to monitor the initial transaction until it
+  //is adopted.
+  const checkAirdropStatus = async (url: any, airdropHash: any, txId: any) => {
+    setPopUpLoading("first confirmation");
 
-      const getAirdrop = async (url:any,airdropHash:any) => {
-      const transactions = await axios.get(`${url}/api/v0/get_transactions/${airdropHash}`)
-      console.log(transactions.data);
-       const length = transactions.data.length
-      // const cborHex = transactions.data.cborHex
-      // const txId = transactions.data.description
-      setPopUpLoading(`you will sign ${length} transactions`);
-      const loop = await forLoop(transactions,url)
-      
-      }
+    await axios
+      .get(`${url}/api/v0/airdrop_status/${airdropHash}`)
+      .then((response) => {
+        //recursive loop checks for adoption and gets
+        //airdrop transactions
+        if (
+          response.data.transactions[0].transaction_status ==
+          "transaction submitted"
+        ) {
+          console.log(response.data.transactions[0].transaction_status);
+          sleep(5000).then(() => {
+            checkAirdropStatus(url, airdropHash, txId);
+          });
+        } else {
+          console.log(response.data.transactions[0].transaction_status);
+          getAirdrop(url, airdropHash);
+        }
+      });
+  };
+  // get the airdrop transactions
+  const getAirdrop = async (url: any, airdropHash: any) => {
+    const transactions = await axios.get(
+      `${url}/api/v0/get_transactions/${airdropHash}`
+    );
+    console.log(transactions.data);
+    const length = transactions.data.length;
+    // const cborHex = transactions.data.cborHex
+    // const txId = transactions.data.description
+    //setPopUpLoading(`you will sign ${length} transactions`);
+    const loop = await forLoop(transactions, url);
+  };
+  //// this is the loop that cycles through the transactions.
+  /// the walletSight function seems to return the unsigned function in this case.
+  // the same functions without the loop work good for a single transaction.
+  const forLoop = async (transactions: any, url: any) => {
+    const length = transactions.data.length;
+    for (let i = 0; i < length; i++) {
+      const cborHex = transactions.data[i].cborHex;
+      let txId = transactions.data[i].description;
+      console.log(txId);
+      let cleared = await clearSignature(cborHex);
+      let tx = cleared[0];
+      console.log(tx);
+      let tWS = cleared[1];
+      console.log(tWS);
+      let signed = await walletSign(cleared[0], cleared[1], txId);
+      console.log(signed);
+      let submitted = await submit_transaction(signed, url);
 
-      const forLoop = async (transactions:any,url:any) => {
-      const length = transactions.data.length 
-      for(let i =0; i < length; i++) {
-      try {const cborHex = transactions.data[i].cborHex
-      let txId = transactions.data[i].description
-      console.log(txId)
-      let cleared = await clearSignature(cborHex)
-      let tx = cleared[0]
-      console.log(tx)
-      let tWS = cleared[1]
-      console.log(tWS)
-      let signed = await walletSign(cleared[0],cleared[1],txId)
-      console.log(signed)
-      let submitted = await submit_transaction(signed,url)
-      } catch (e: any) {}
-    
-     // const submitted = await submit_transaction(signed,url)
+      // const submitted = await submit_transaction(signed,url)
       //console.log(submitted)
-      }
-      
     }
-
-
-
-
-
-
-const clearSignature = async (cborHex:any) => {
- 
-  const txCli = Transaction.from_bytes(Buffer.from(cborHex, "hex"));
-    //begin signature
-   const txBody = txCli.body();
-   const witnessSet = txCli.witness_set();
-    //this clears the dummy signature from the transaction
-   witnessSet.vkeys()?.free();
-    //build new unsigned transaction
-   var transactionWitnessSet = TransactionWitnessSet.new();
-   var tx = Transaction.new(
-       txBody,
-       TransactionWitnessSet.from_bytes(transactionWitnessSet.to_bytes())
-  );
-   return [tx,transactionWitnessSet]
-
-
-}
-
-const walletSign = async (tx:any,transactionWitnessSet:any,txId:any) => {
-  console.log(tx)
-  let txVkeyWitnesses =  await api.signTx(Buffer.from(tx.to_bytes(), "utf8").toString("hex"), true);
-  console.log(txVkeyWitnesses)
- txVkeyWitnesses = TransactionWitnessSet.from_bytes(Buffer.from(txVkeyWitnesses, "hex"));
-  console.log(txVkeyWitnesses)
-  transactionWitnessSet.set_vkeys(txVkeyWitnesses.vkeys());
-  const signedTx = Transaction.new(
-      tx.body(),
-      transactionWitnessSet
-  );
-  console.log(signedTx)
-  const hexSigned = await (Buffer.from(signedTx.to_bytes(), "utf8").toString("hex"));
-  console.log(hexSigned)
-  const txFormatted = (`{ \n\t\"type\": \"Tx AlonzoEra\",\n\t\"description\": \"${txId}",\n\t\"cborHex\": \"${hexSigned}\"\n}`);
-  console.log (txFormatted);
-  const txJson = JSON.parse(txFormatted);
-  console.log(txJson)
-  return txJson;
-  
-  }
-
-
-
-
-
-
-
-
-
-
-
-      //setPopUpSuccess()
-   
-    // const url = process.env.REACT_APP_API_TX;
-    // console.log(multiTx)
-    // try {
-    //   const submitAirdrop = await axios.post(
-    //     `${url}/api/v0/submit`,
-    //     requestBody
-    //   );
-    //   const cborHexInString = submitAirdrop.data.cborHex;
-    //   const txId = submitAirdrop.data.description;
-    //   //const numberTxs = submitAirdrop.data.
-    //   //const submission = ''
-    //   clearAndSign(cborHexInString,txId,url).then(txJson => 
-    //   (submit_transaction(txJson,url))).then(submission => { const test = submission; 
-    //     if (multiTx == "false") {
-    //     setPopUpSuccess(
-    //       `Success. \"${test.status}`) 
-    //     }  else {
-    //       setPopUpLoading(`negotiating UTXOs...`);
-    //       console.log(test)
-    //       console.log(test.airdrop_hash)
-    //       const airdropStatus = checkAirdropStatus(url,test.airdrop_hash,txId)
-    //     }})
-      
-    //   //setPopUpSuccess()
-      
-    //} catch (e: any) {}
-  // }else{
-  //   try { const submitAirdrop = await axios.post(
-  //     `${url}/api/v0/submit`,
-  //     requestBody
-  //   );
-  //   const cborHexInString = submitAirdrop.data.cborHex;
-  //   const txId = submitAirdrop.data.description;
-  //   clearAndSign(cborHexInString,txId,url).then(txJson => {
-      
-  //   }
-  //     )
-    
-  //   }
-   
-  
-  
-  //  catch (e: any) {}   
-  // }
-    
-  
-
-
-
-    //signAndSubmit(obj,airdropHash,url,txId).then();
-    //const tx = manipulate(obj.tx,txId)
-    //clearSignature(cborHex).then(txJson => 
-    //(submit_transaction(txJson,url))).then(submission => { const test = submission; 
-    //console.log (submission)
-  
-  
-
- 
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-const clearAndSign = async (cborHex:any, txId:any, url:any) => {
-     
+  };
+  // code to wipe the transaction witnesses. This is required to prepare
+  /// cardano-cli tx for cardano-serialization-lib signing.
+  const clearSignature = async (cborHex: any) => {
     const txCli = Transaction.from_bytes(Buffer.from(cborHex, "hex"));
     //begin signature
-   const txBody = txCli.body();
-   const witnessSet = txCli.witness_set();
+    const txBody = txCli.body();
+    const witnessSet = txCli.witness_set();
     //this clears the dummy signature from the transaction
-   witnessSet.vkeys()?.free();
+    witnessSet.vkeys()?.free();
     //build new unsigned transaction
-   const transactionWitnessSet = TransactionWitnessSet.new();
-   const tx = Transaction.new(
-       txBody,
-       TransactionWitnessSet.from_bytes(transactionWitnessSet.to_bytes())
-   );
-  
-    
-   let txVkeyWitnesses =  await api.signTx(Buffer.from(tx.to_bytes(), "utf8").toString("hex"), true);
-   txVkeyWitnesses = TransactionWitnessSet.from_bytes(Buffer.from(txVkeyWitnesses, "hex"));
-    transactionWitnessSet.set_vkeys(txVkeyWitnesses.vkeys());
-    const signedTx = Transaction.new(
-        tx.body(),
-        transactionWitnessSet
+    var transactionWitnessSet = TransactionWitnessSet.new();
+    var tx = Transaction.new(
+      txBody,
+      TransactionWitnessSet.from_bytes(transactionWitnessSet.to_bytes())
     );
-    const hexSigned = (Buffer.from(signedTx.to_bytes(), "utf8").toString("hex"));
-    const txFormatted = (`{ \n\t\"type\": \"Tx AlonzoEra\",\n\t\"description\": \"${txId}",\n\t\"cborHex\": \"${hexSigned}\"\n}`);
-     //console.log (txFormatted);
+    return [tx, transactionWitnessSet];
+  };
+
+  //signing funcion and creating json object
+
+  const walletSign = async (tx: any, transactionWitnessSet: any, txId: any) => {
+    console.log(tx);
+    let txVkeyWitnesses = await api.signTx(
+      Buffer.from(tx.to_bytes(), "utf8").toString("hex"),
+      true
+    );
+    console.log(txVkeyWitnesses);
+    txVkeyWitnesses = TransactionWitnessSet.from_bytes(
+      Buffer.from(txVkeyWitnesses, "hex")
+    );
+    console.log(txVkeyWitnesses);
+    transactionWitnessSet.set_vkeys(txVkeyWitnesses.vkeys());
+    const signedTx = Transaction.new(tx.body(), transactionWitnessSet);
+    console.log(signedTx);
+    const hexSigned = await Buffer.from(signedTx.to_bytes(), "utf8").toString(
+      "hex"
+    );
+    console.log(hexSigned);
+    const txFormatted = `{ \n\t\"type\": \"Tx AlonzoEra\",\n\t\"description\": \"${txId}",\n\t\"cborHex\": \"${hexSigned}\"\n}`;
+    console.log(txFormatted);
     const txJson = JSON.parse(txFormatted);
+    console.log(txJson);
     return txJson;
-    
-    }
-  
-    const submit_transaction = async (txJson:any, url:any) => {
-    const txSubmit = await axios.post(`${url}/api/v0/submit_transaction`, txJson);
-    const submission = (txSubmit.data);
+  };
+
+  const submit_transaction = async (txJson: any, url: any) => {
+    const txSubmit = await axios.post(
+      `${url}/api/v0/submit_transaction`,
+      txJson
+    );
+    const submission = txSubmit.data;
     return submission;
-    }
-    //const txSubmit = await axios.post(`${url}/api/v0/submit_transaction`, txJson);
-    //const submission = (txSubmit.data);
-  
-   //return tx
-   //return transactionWitnessSet
-   //return submission;
-  //}
-  // const manipulate = async (cborHex:any, txId:any, url:any) => {
-  //   const txCli = Transaction.from_bytes(Buffer.from(cborHex, "hex"));
-  //   //begin signature
-  //  const txBody = txCli.body();
-  //  const witnessSet = txCli.witness_set();
-  //   //this clears the dummy signature from the transaction
-  //  witnessSet.vkeys()?.free();
-  //   //build new unsigned transaction
-  //  const transactionWitnessSet = TransactionWitnessSet.new();
-  //  const tx = Transaction.new(
-  //      txBody,
-  //      TransactionWitnessSet.from_bytes(transactionWitnessSet.to_bytes())
-  //  );
-  //  let txVkeyWitnesses =  await api.signTx(Buffer.from(tx.to_bytes(), "utf8").toString("hex"), true);
-  //  txVkeyWitnesses = TransactionWitnessSet.from_bytes(Buffer.from(txVkeyWitnesses, "hex"));
-  //   transactionWitnessSet.set_vkeys(txVkeyWitnesses.vkeys());
-  //   const signedTx = Transaction.new(
-  //       tx.body(),
-  //       transactionWitnessSet
-  //   );
-  //   const hexSigned = (Buffer.from(signedTx.to_bytes(), "utf8").toString("hex"));
-  //   const txFormatted = (`{ \n\t\"type\": \"Tx AlonzoEra\",\n\t\"description\": \"${txId}",\n\t\"cborHex\": \"${hexSigned}\"\n}`);
-  //    //console.log (txFormatted);
-  //   const txJson = JSON.parse(txFormatted);
-  //   console.log (txJson);
-  //   const txSubmit = await axios.post(`${url}/api/v0/submit_transaction`, txJson);
-  //   const submission = (txSubmit.data);
-  
-  //  //return tx
-  //  //return transactionWitnessSet
-  //  return submission;
-  // }
-  
+  };
+
   const validateAirdropRequest = async () => {
     setPopUpLoading("Validating request");
 
@@ -356,7 +223,7 @@ const clearAndSign = async (cborHex:any, txId:any, url:any) => {
       totalAmountToAirdrop,
       addressContainingAda
     );
-    
+
     const url = process.env.REACT_APP_API_TX;
 
     try {
@@ -368,14 +235,14 @@ const clearAndSign = async (cborHex:any, txId:any, url:any) => {
       setTxFee(txFeeInAda);
       setAdaToSpend(adaToSpendForTxInAda);
       setTsAbleToAirdrop(true);
-      console.log (txData.data.transactions_count);
+      console.log(txData.data.transactions_count);
       if (txData.data.transactions_count > 1) {
-        multiTx = 'true'
-        console.log(multiTx)
-      }else{
-        multiTx = 'false'
+        multiTx = "true";
+        console.log(multiTx);
+      } else {
+        multiTx = "false";
       }
-      
+
       setPopUpSuccess(
         `Airdrop is validated. You can proceed with the airdrop.`
       );
