@@ -27,7 +27,7 @@ import { sign } from "node:crypto";
 /// I added these two
 
 const Buffer = require("buffer/").Buffer;
-
+var multiTx = 'false'
 const COMPONENT_CLASS = "airdrop-tool";
 
 export default function AirdropTool() {
@@ -223,10 +223,7 @@ export default function AirdropTool() {
       totalAmountToAirdrop,
       addressContainingAda
     );
-      //debugging for tom
-    //const airdropJson = JSON.stringify(requestBody, null, 2);
-    //console.log(airdropJson);
-      ///
+    
     const url = process.env.REACT_APP_API_TX;
 
     try {
@@ -234,9 +231,6 @@ export default function AirdropTool() {
       const adaToSpendForTxInAda = lovelaceToAda(
         txData.data.spend_amounts.lovelace
       );
-      //tom
-      console.log(txData.data);
-      //
       const txFeeInAda = lovelaceToAda(txData.data.tx_fee);
       setTxFee(txFeeInAda);
       setAdaToSpend(adaToSpendForTxInAda);
