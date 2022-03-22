@@ -27,7 +27,8 @@ import { sign } from "node:crypto";
 /// I added these two
 
 const Buffer = require("buffer/").Buffer;
-var multiTx = 'false'
+var multiTx = "false";
+
 const COMPONENT_CLASS = "airdrop-tool";
 
 export default function AirdropTool() {
@@ -58,7 +59,7 @@ export default function AirdropTool() {
       selectedToken,
       addressArray,
       totalAmountToAirdrop,
-      addressContainingAda,
+      addressContainingAda
     );
 
     const url = process.env.REACT_APP_API_TX;
@@ -197,6 +198,7 @@ export default function AirdropTool() {
     );
     const txFormatted = `{ \n\t\"type\": \"Tx AlonzoEra\",\n\t\"description\": \"${txId}",\n\t\"cborHex\": \"${hexSigned}\"\n}`;
     const txJson = JSON.parse(txFormatted);
+    console.log(txJson);
     return txJson;
   };
 
@@ -223,7 +225,7 @@ export default function AirdropTool() {
       totalAmountToAirdrop,
       addressContainingAda
     );
-    
+
     const url = process.env.REACT_APP_API_TX;
 
     try {
