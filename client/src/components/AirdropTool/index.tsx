@@ -27,7 +27,6 @@ import { sign } from "node:crypto";
 /// I added these two
 
 const Buffer = require("buffer/").Buffer;
-var multiTx = "false";
 
 const COMPONENT_CLASS = "airdrop-tool";
 
@@ -38,6 +37,7 @@ export default function AirdropTool() {
   const [txFee, setTxFee] = useState(0);
   const [adaToSpend, setAdaToSpend] = useState(0);
   const [isAbleToAirdrop, setTsAbleToAirdrop] = useState(false);
+  const [multiTx, setMultiTx] = useState(false)
 
   const [CLASS, CHILD_CLASS] = useDualThemeClass({
     main: COMPONENT_CLASS,
@@ -87,7 +87,7 @@ export default function AirdropTool() {
       console.log(submitted.status);
 
       //check single or multi transaction
-      if (multiTx == "false") {
+      if (!multiTx) {
         setPopUpSuccess(`${submitted.status}`);
       } else {
         setPopUpLoading(`negotiating UTXOs...`);
@@ -237,10 +237,9 @@ export default function AirdropTool() {
       setTsAbleToAirdrop(true);
       console.log(txData.data.transactions_count);
       if (txData.data.transactions_count > 1) {
-        multiTx = "true";
-        console.log(multiTx);
+        setMultiTx(true)
       } else {
-        multiTx = "false";
+        setMultiTx(false)
       }
 
       setPopUpSuccess(
