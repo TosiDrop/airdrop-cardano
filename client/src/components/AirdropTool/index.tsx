@@ -197,7 +197,6 @@ export default function AirdropTool() {
     );
     const txFormatted = `{ \n\t\"type\": \"Tx AlonzoEra\",\n\t\"description\": \"${txId}",\n\t\"cborHex\": \"${hexSigned}\"\n}`;
     const txJson = JSON.parse(txFormatted);
-    console.log(txJson);
     return txJson;
   };
 
