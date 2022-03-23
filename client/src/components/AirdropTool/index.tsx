@@ -126,32 +126,45 @@ export default function AirdropTool() {
 
   // get the airdrop transactions
   const getAirdrop = async (url: any, airdropHash: any) => {
-    const transactions = await axios.get(
+    const response = await axios.get(
       `${url}/api/v0/get_transactions/${airdropHash}`
     );
-    console.log(transactions)
-    return 
-    const length = transactions.data.length;
+    const transactions = response.data
+    const transactionsToSign = []
+    const txHashMap: { [key: string]: boolean } = {}
+    let txDesc: string
+    for (let tx of transactions) {
+      txDesc = tx.description
+      if (txHashMap[txDesc] == null) {  
+        console.log(tx)
+        txHashMap[txDesc] = true
+        transactionsToSign.push({ ...tx })
+      }
+    }
     // const cborHex = transactions.data.cborHex
     // const txId = transactions.data.description
     //setPopUpLoading(`you will sign ${length} transactions`);
-    const loop = await forLoop(transactions, url);
+    await forLoop(transactionsToSign, url);
   };
   //// this is the loop that cycles through the transactions.
   /// the walletSight function seems to return the unsigned function in this case.
   // the same functions without the loop work good for a single transaction.
-  const forLoop = async (transactions: any, url: any) => {
-    const length = transactions.data.length;
-    for (let i = 0; i < length; i++) {
-      const cborHex = transactions.data[i].cborHex;
-      let txId = transactions.data[i].description;
-      let cleared = await clearSignature(cborHex);
-      let tx = cleared[0];
-      let tWS = cleared[1];
-      let signed = await walletSign(cleared[0], cleared[1], txId);
-      let submitted = await submit_transaction(signed, url);
 
-      // const submitted = await submit_transaction(signed,url)
+  interface Transaction {
+    description: string
+    type: string  
+    cborHex: string
+  }
+
+  const forLoop = async (transactions: Transaction[], url: any) => {
+    let cborHex, txId, cleared, signed, submitted
+    for (let tx of transactions) {
+      cborHex = tx.cborHex;
+      txId = tx.description;
+      console.log(tx)
+      cleared = await clearSignature(cborHex);
+      signed = await walletSign(cleared[0], cleared[1], txId);
+      submitted = await submit_transaction(signed, url);
     }
   };
   // code to wipe the transaction witnesses. This is required to prepare
