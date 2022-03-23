@@ -246,6 +246,7 @@ class EventSubmit(Resource):
         applog.info('airdrop_hash: %s' % airdrop_hash)
         src_addresses, change_address, airdrops_list, spend_amounts, dst_addresses, \
             token_name, amounts, out, err = parse_airdrop_data(data)
+
         if err:
             msg = {}
             msg['error'] = 'err'
@@ -339,12 +340,12 @@ class EventSubmit(Resource):
         # for the totals of all transactions
         amount_lovelace = 0
         amount_tokens = 0
-        for address in dst_addresses:
+        for item in airdrops_list:
             count += 1
             output = {}
-            output['address'] = address
-            output['lovelace'] = amounts[address][0]['amount']
-            output[token_name] = amounts[address][1]['amount']
+            output['address'] = item['address']
+            output['lovelace'] = item['lovelace_amount']
+            output[token_name] = item['tokens_amount']
             # calculate the total amount of ADA and Tokens in this transaction
             trans_lovelace += output['lovelace']
             trans_tokens += output[token_name]
@@ -388,7 +389,7 @@ class EventSubmit(Resource):
         t_cnt = 0
         for t in transactions:
             t_cnt += 1
-            applog.debug('Transaction %d: %s' % (t_cnt, t))
+            # applog.debug('Transaction %d: %s' % (t_cnt, t))
         # debug
         applog.info('total lovelace in transactions: %d' % amount_lovelace)
         applog.info('total tokens in transactions: %d' % amount_tokens)
@@ -774,6 +775,12 @@ class EventSubmitTransaction(Resource):
                     "WHERE t.hash = ? ORDER BY t.id DESC limit 1", (old_txid, ))
         try:
             trans = cur.fetchone()
+            if not trans:
+                applog.error('Transaction %s not found' % old_txid)
+                msg = {}
+                msg['error'] = 'Transaction %s not found' % old_txid
+                msg['CODE'] = 'TRANSACTION_NOT_FOUND'
+                return msg, 406
             trans_id = trans[0]
             airdrop_id = trans[1]
             name = trans[2]
