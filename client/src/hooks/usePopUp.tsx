@@ -1,9 +1,12 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { setPopUp } from "reducers/globalSlice";
 import { PopUpType } from "utils";
 
 const usePopUp = () => {
   const dispatch = useDispatch();
+
+  const { popUp } = useSelector((state: RootStateOrAny) => state.global);
+
   const setPopUpError = (errorMessage: string) => {
     dispatch(
       setPopUp({
@@ -34,9 +37,8 @@ const usePopUp = () => {
   const closePopUp = () => {
     dispatch(
       setPopUp({
+        ...popUp,
         show: false,
-        type: PopUpType.SUCCESS,
-        text: "",
       })
     );
   };
