@@ -27,7 +27,6 @@ import { sign } from "node:crypto";
 /// I added these two
 
 const Buffer = require("buffer/").Buffer;
-var multiTx = "false";
 
 const COMPONENT_CLASS = "airdrop-tool";
 
