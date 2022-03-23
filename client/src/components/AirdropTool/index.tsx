@@ -37,7 +37,7 @@ export default function AirdropTool() {
   const [txFee, setTxFee] = useState(0);
   const [adaToSpend, setAdaToSpend] = useState(0);
   const [isAbleToAirdrop, setTsAbleToAirdrop] = useState(false);
-  const [multiTx, setMultiTx] = useState(false)
+  const [multiTx, setMultiTx] = useState(false);
 
   const CLASS = useDualThemeClass({ className: COMPONENT_CLASS })
 
@@ -77,57 +77,57 @@ export default function AirdropTool() {
 
       // functions to  erase witnesses, sign, and submit to api
       const cleared = await clearSignature(cborHexInString);
-      console.log(cleared);
       const signed = await walletSign(cleared[0], cleared[1], txId);
-      console.log(signed);
       const submitted = await submit_transaction(signed, url);
-      console.log(submitted.status);
 
       //check single or multi transaction
       if (!multiTx) {
         setPopUpSuccess(`${submitted.status}`);
       } else {
         setPopUpLoading(`negotiating UTXOs...`);
-        //console.log(test.)
-        //console.log(test.airdrop_hash)
-        await checkAirdropStatus(url, submitted.airdrop_hash, txId);
+        await handleMultiTxAirdrop(url, submitted.airdrop_hash, txId);
       }
     } catch (e: any) {}
   };
-  //sleep function
-  const sleep = (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
-  //for a multi transaction we need to monitor the initial transaction until it
-  //is adopted.
-  const checkAirdropStatus = async (url: any, airdropHash: any, txId: any) => {
-    setPopUpLoading("first confirmation");
 
-    await axios
-      .get(`${url}/api/v0/airdrop_status/${airdropHash}`)
-      .then((response) => {
-        //recursive loop checks for adoption and gets
-        //airdrop transactions
-        if (
-          response.data.transactions[0].transaction_status ==
-          "transaction submitted"
-        ) {
-          console.log(response.data.transactions[0].transaction_status);
-          sleep(5000).then(() => {
-            checkAirdropStatus(url, airdropHash, txId);
-          });
-        } else {
-          console.log(response.data.transactions[0].transaction_status);
-          getAirdrop(url, airdropHash);
-        }
-      });
+  const handleMultiTxAirdrop = async (
+    url: any,
+    airdropHash: any,
+    txId: any
+  ) => {
+    setPopUpLoading("Waiting for the first confirmation");
+    try {
+      let initialTxAdopted: boolean = false;
+      while (!initialTxAdopted) {
+        initialTxAdopted = await checkInitialTxStatus(url, airdropHash, txId);
+        await sleep(500);
+      }
+      getAirdrop(url, airdropHash);
+    } catch (e: any) {
+      console.log(e);
+    }
   };
+
+  const checkInitialTxStatus = async (
+    url: any,
+    airdropHash: any,
+    txId: any
+  ) => {
+    const response = await axios.get(
+      `${url}/api/v0/airdrop_status/${airdropHash}`
+    );
+    const txStatus = response.data.transactions[0].transaction_status;
+    if (txStatus == "transaction adopted") return true;
+    return false;
+  };
+
   // get the airdrop transactions
   const getAirdrop = async (url: any, airdropHash: any) => {
     const transactions = await axios.get(
       `${url}/api/v0/get_transactions/${airdropHash}`
     );
-    console.log(transactions.data);
+    console.log(transactions)
+    return 
     const length = transactions.data.length;
     // const cborHex = transactions.data.cborHex
     // const txId = transactions.data.description
@@ -142,18 +142,13 @@ export default function AirdropTool() {
     for (let i = 0; i < length; i++) {
       const cborHex = transactions.data[i].cborHex;
       let txId = transactions.data[i].description;
-      console.log(txId);
       let cleared = await clearSignature(cborHex);
       let tx = cleared[0];
-      console.log(tx);
       let tWS = cleared[1];
-      console.log(tWS);
       let signed = await walletSign(cleared[0], cleared[1], txId);
-      console.log(signed);
       let submitted = await submit_transaction(signed, url);
 
       // const submitted = await submit_transaction(signed,url)
-      //console.log(submitted)
     }
   };
   // code to wipe the transaction witnesses. This is required to prepare
@@ -177,27 +172,20 @@ export default function AirdropTool() {
   //signing funcion and creating json object
 
   const walletSign = async (tx: any, transactionWitnessSet: any, txId: any) => {
-    console.log(tx);
     let txVkeyWitnesses = await api.signTx(
       Buffer.from(tx.to_bytes(), "utf8").toString("hex"),
       true
     );
-    console.log(txVkeyWitnesses);
     txVkeyWitnesses = TransactionWitnessSet.from_bytes(
       Buffer.from(txVkeyWitnesses, "hex")
     );
-    console.log(txVkeyWitnesses);
     transactionWitnessSet.set_vkeys(txVkeyWitnesses.vkeys());
     const signedTx = Transaction.new(tx.body(), transactionWitnessSet);
-    console.log(signedTx);
     const hexSigned = await Buffer.from(signedTx.to_bytes(), "utf8").toString(
       "hex"
     );
-    console.log(hexSigned);
     const txFormatted = `{ \n\t\"type\": \"Tx AlonzoEra\",\n\t\"description\": \"${txId}",\n\t\"cborHex\": \"${hexSigned}\"\n}`;
-    console.log(txFormatted);
     const txJson = JSON.parse(txFormatted);
-    console.log(txJson);
     return txJson;
   };
 
@@ -232,11 +220,10 @@ export default function AirdropTool() {
       setTxFee(txFeeInAda);
       setAdaToSpend(adaToSpendForTxInAda);
       setTsAbleToAirdrop(true);
-      console.log(txData.data.transactions_count);
       if (txData.data.transactions_count > 1) {
-        setMultiTx(true)
+        setMultiTx(true);
       } else {
-        setMultiTx(false)
+        setMultiTx(false);
       }
 
       setPopUpSuccess(
@@ -317,3 +304,8 @@ function prepareBody(
   };
   return body;
 }
+
+//sleep function
+const sleep = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
