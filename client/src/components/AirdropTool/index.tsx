@@ -133,7 +133,6 @@ export default function AirdropTool() {
     for (let tx of transactions) {
       txDesc = tx.description
       if (txHashMap[txDesc] == null) {  
-        console.log(tx)
         txHashMap[txDesc] = true
         transactionsToSign.push({ ...tx })
       }
@@ -158,7 +157,6 @@ export default function AirdropTool() {
     for (let tx of transactions) {
       cborHex = tx.cborHex;
       txId = tx.description;
-      console.log(tx)
       cleared = await clearSignature(cborHex);
       signed = await walletSign(cleared[0], cleared[1], txId);
       submitted = await submit_transaction(signed, url);
@@ -309,7 +307,6 @@ function prepareBody(
 
   const body: AirdropRequestBody = {
     source_addresses: sourceAddresses,
-    change_address: walletAddress,
     token_name: `${selectedToken.policyId}.${selectedToken.nameHex}`,
     addresses: addressArray.map((addr: AddressAmount) => ({
       [addr.address]: addr.amount * Math.pow(10, selectedToken.decimals),
