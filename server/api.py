@@ -275,6 +275,8 @@ class EventSubmit(Resource):
             err = get_available_amounts(src_addresses)
         if err:
             applog.error(err)
+            msg = {}
+            msg['error'] = err
             msg['CODE'] = 'UNKNOWN_AVAILABLE_TOKENS'
             return err, 503
 
@@ -285,8 +287,8 @@ class EventSubmit(Resource):
             msg['error'] = 'No source transactions (UTXOs)!'
             msg['CODE'] = 'MISSING_UTXOS'
             return msg, 406
-        applog.info('Source transactions: %s' % src_transactions)
-        applog.info('Source token transactions: %s' % src_token_transactions)
+        # applog.info('Source transactions: %s' % src_transactions)
+        # applog.info('Source token transactions: %s' % src_token_transactions)
         applog.info('Amounts available: %s' % tokens_amounts)
         applog.info('Amounts to spend: %s' % spend_amounts)
 
@@ -309,7 +311,6 @@ class EventSubmit(Resource):
             applog.info('Airdrop is possible - available amounts are more than the amounts to spend.')
             if spend_amounts['lovelace'] + extra_ada * 1000000 > tokens_amounts['lovelace']:
                 applog.error('Please be sure there are about %d extra ADA in the source address.\n' % extra_ada)
-        applog.info('source_transactions: %s\n' % source_transactions)
 
         """
         Create the required transactions list for the airdrop
@@ -334,6 +335,8 @@ class EventSubmit(Resource):
         transaction = {}
         inputs = []
         outputs = []
+        total_inputs = []
+        total_outputs = []
         trans_lovelace = 0
         trans_tokens = 0
         count = 0
@@ -344,8 +347,8 @@ class EventSubmit(Resource):
             count += 1
             output = {}
             output['address'] = item['address']
-            output['lovelace'] = item['lovelace_amount']
-            output[token_name] = item['tokens_amount']
+            output['lovelace'] = int(item['lovelace_amount'])
+            output[token_name] = int(item['tokens_amount'])
             # calculate the total amount of ADA and Tokens in this transaction
             trans_lovelace += output['lovelace']
             trans_tokens += output[token_name]
@@ -353,6 +356,7 @@ class EventSubmit(Resource):
             amount_lovelace += output['lovelace']
             amount_tokens += output[token_name]
             outputs.append(output)
+            total_outputs.append(output)
             if count >= ADDRESSES_PER_TRANSACTION:
                 # total amounts for this transaction
                 total_amounts = {}
@@ -384,15 +388,46 @@ class EventSubmit(Resource):
             transaction['total_amounts'] = total_amounts
             transactions.append(transaction)
 
-        applog.debug('Number of transactions to do: %d' % len(transactions))
-        applog.debug('Transactions list:')
-        t_cnt = 0
-        for t in transactions:
-            t_cnt += 1
-            # applog.debug('Transaction %d: %s' % (t_cnt, t))
         # debug
-        applog.info('total lovelace in transactions: %d' % amount_lovelace)
-        applog.info('total tokens in transactions: %d' % amount_tokens)
+        applog.info('----------------------------------------------------')
+        applog.info('Number of transactions to do:   %20d' % len(transactions))
+        applog.info('total lovelace in transactions: %20d' % amount_lovelace)
+        applog.info('total tokens in transactions:   %20d' % amount_tokens)
+        applog.info('----------------------------------------------------')
+        applog.info('----------------------------')
+        applog.info('Number of inputs:  %9d' % (len(src_transactions) + len(src_token_transactions)))
+        applog.info('Number of outputs: %9d' % (len(total_outputs) + 1))
+        applog.info('----------------------------')
+
+        """
+        If we have too many inputs, we need to make an input selection, to reduce the transaction size.
+        First we need to sort the tokens transactions after the amount of available tokens in reverse order.
+        """
+        def selection_sort(input_list):
+            for idx in range(len(input_list)):
+                max_idx = idx
+                for j in range(idx + 1, len(input_list)):
+                    v1 = 0
+                    for item in input_list[max_idx]['amounts']:
+                        if item['token'] == token_name:
+                            v1 = int(item['amount'])
+                    v2 = 0
+                    for item in input_list[j]['amounts']:
+                        if item['token'] == token_name:
+                            v2 = int(item['amount'])
+                    if v1 < v2:
+                        max_idx = j
+                # Swap the minimum value with the compared value
+                input_list[idx], input_list[max_idx] = input_list[max_idx], input_list[idx]
+        selection_sort(src_token_transactions)
+
+        """"
+        applog.debug('======================')
+        applog.debug(tokens_amounts)
+        for item in src_token_transactions:
+            applog.debug(item)
+        applog.debug('======================')
+        """
 
         """
         Write the airdrop information and the transaction information in the database
@@ -413,46 +448,55 @@ class EventSubmit(Resource):
 
             transaction = {}
             transaction['inputs'] = []
-            transaction['outputs'] = []
+            transaction['outputs'] = transactions[0]['outputs']
             transaction['change_address'] = ''
             transaction['amount_lovelace'] = 0
             transaction['amount_tokens'] = 0
-            cmd = ['cardano-cli', 'transaction', 'build']
-            # add the inputs
-            for t in src_transactions:
-                cmd.append('--tx-in')
-                cmd.append(t['hash'] + '#' + t['id'])
-                transaction['inputs'].append(t['hash'] + '#' + t['id'])
+            transaction['other_tokens'] = {}
             for t in src_token_transactions:
-                cmd.append('--tx-in')
-                cmd.append(t['hash'] + '#' + t['id'])
+                if transaction['amount_tokens'] > spend_amounts[token_name]:
+                    break
                 transaction['inputs'].append(t['hash'] + '#' + t['id'])
-            for t in transactions[0]['outputs']:
+                for item in t['amounts']:
+                    if item['token'] == 'lovelace':
+                        transaction['amount_lovelace'] += int(item['amount'])
+                    elif item['token'] == token_name:
+                        transaction['amount_tokens'] += int(item['amount'])
+                    else:
+                        if item['token'] in transaction['other_tokens']:
+                            transaction['other_tokens'][item['token']] += int(item['amount'])
+                        else:
+                            transaction['other_tokens'][item['token']] = int(item['amount'])
+            for t in src_transactions:
+                if transaction['amount_lovelace'] > spend_amounts['lovelace'] + calculate_min_ada(token_name):
+                    break
+                transaction['inputs'].append(t['hash'] + '#' + t['id'])
+                transaction['amount_lovelace'] += int(t['amount'])
+
+            """
+            Calculate the amounts of lovelace, tokens and other tokens in all spent UTxOs
+            """
+            # create the cmd
+            cmd = ['cardano-cli', 'transaction', 'build']
+            for t in transaction['inputs']:
+                cmd.append('--tx-in')
+                cmd.append(t)
+                applog.debug(t)
+            for t in transaction['outputs']:
                 cmd.append('--tx-out')
                 cmd.append(t['address'] + '+' + str(t['lovelace']) + '+' + str(t[token_name]) + ' ' + token_name)
                 output = {}
                 output['address'] = t['address']
                 output['lovelace'] = t['lovelace']
                 output[token_name] = t[token_name]
-                transaction['outputs'].append(output)
-            for t in src_token_transactions:
-                for am in t['amounts']:
-                    if am['token'] != token_name and am['token'] != 'lovelace':
-                        cmd.append('--tx-out')
-                        cmd.append(change_address + '+' + str(EXTRA_LOVELACE) + '+' + str(am['amount']) +
-                                   ' ' + str(am['token']) + '')
-                        output = {}
-                        output['address'] = change_address
-                        output['lovelace'] = EXTRA_LOVELACE
-                        output[am['token']] = am['amount']
-                        transaction['outputs'].append(output)
+                applog.debug(output)
             cmd.append('--tx-out')
             cmd.append(change_address + '+' + str(EXTRA_LOVELACE) + '+' +
-                       str(tokens_amounts[token_name] - spend_amounts[token_name]) + ' ' + str(token_name))
+                       str(transaction['amount_tokens'] - spend_amounts[token_name]) + ' ' + str(token_name))
             output = {}
             output['address'] = change_address
             output['lovelace'] = EXTRA_LOVELACE
-            output[token_name] = tokens_amounts[token_name] - spend_amounts[token_name]
+            output[token_name] = str(transaction['amount_tokens'] - spend_amounts[token_name])
             transaction['outputs'].append(output)
             cmd.append('--change-address')
             cmd.append(change_address)
@@ -464,6 +508,7 @@ class EventSubmit(Resource):
             cmd.append(CARDANO_NET)
             if len(MAGIC_NUMBER) != 0:
                 cmd.append(str(MAGIC_NUMBER))
+
             out, err = cardano_cli_cmd(cmd)
             if err:
                 applog.error(err)
@@ -556,16 +601,41 @@ class EventSubmit(Resource):
             transaction['change_address'] = ''
             transaction['amount_lovelace'] = 0
             transaction['amount_tokens'] = 0
-            cmd = ['cardano-cli', 'transaction', 'build']
-            # add the inputs
-            for t in src_transactions:
-                cmd.append('--tx-in')
-                cmd.append(t['hash'] + '#' + t['id'])
-                transaction['inputs'].append(t['hash'] + '#' + t['id'])
+            transaction['other_tokens'] = {}
             for t in src_token_transactions:
-                cmd.append('--tx-in')
-                cmd.append(t['hash'] + '#' + t['id'])
+                if transaction['amount_tokens'] > spend_amounts[token_name]:
+                    break
                 transaction['inputs'].append(t['hash'] + '#' + t['id'])
+                for item in t['amounts']:
+                    if item['token'] == 'lovelace':
+                        transaction['amount_lovelace'] += int(item['amount'])
+                    elif item['token'] == token_name:
+                        transaction['amount_tokens'] += int(item['amount'])
+                    else:
+                        if item['token'] in transaction['other_tokens']:
+                            transaction['other_tokens'][item['token']] += int(item['amount'])
+                        else:
+                            transaction['other_tokens'][item['token']] = int(item['amount'])
+            for t in src_transactions:
+                if transaction['amount_lovelace'] > spend_amounts['lovelace'] + calculate_min_ada(token_name) + \
+                        EXTRA_LOVELACE * (len(transactions) + 1):
+                    break
+                transaction['inputs'].append(t['hash'] + '#' + t['id'])
+                transaction['amount_lovelace'] += int(t['amount'])
+
+            applog.debug('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+            applog.debug(transaction['amount_lovelace'])
+            applog.debug(transaction['amount_tokens'])
+            applog.debug(transaction['other_tokens'])
+            applog.debug('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+
+            # create the cmd
+            cmd = ['cardano-cli', 'transaction', 'build']
+            for t in transaction['inputs']:
+                cmd.append('--tx-in')
+                cmd.append(t)
+                applog.debug(t)
+
             for t in transactions:
                 cmd.append('--tx-out')
                 cmd.append(first_src_address + '+' + str(t['total_amounts']['lovelace'] + EXTRA_LOVELACE) + '+' +
@@ -575,24 +645,14 @@ class EventSubmit(Resource):
                 output['lovelace'] = t['total_amounts']['lovelace']
                 output[token_name] = t['total_amounts'][token_name]
                 transaction['outputs'].append(output)
-            for t in src_token_transactions:
-                for am in t['amounts']:
-                    if am['token'] != token_name and am['token'] != 'lovelace':
-                        cmd.append('--tx-out')
-                        cmd.append(change_address + '+' + str(EXTRA_LOVELACE) + '+' + str(am['amount']) + ' ' +
-                                   str(am['token']) + '')
-                        output = {}
-                        output['address'] = change_address
-                        output['lovelace'] = EXTRA_LOVELACE
-                        output[am['token']] = am['amount']
-                        transaction['outputs'].append(output)
+
             cmd.append('--tx-out')
             cmd.append(change_address + '+' + str(EXTRA_LOVELACE) + '+' +
-                       str(tokens_amounts[token_name] - spend_amounts[token_name]) + ' ' + str(token_name))
+                       str(transaction['amount_tokens'] - amount_tokens) + ' ' + str(token_name))
             output = {}
             output['address'] = change_address
             output['lovelace'] = EXTRA_LOVELACE
-            output[token_name] = tokens_amounts[token_name] - spend_amounts[token_name]
+            output[token_name] = transaction['amount_tokens'] - amount_tokens
             transaction['outputs'].append(output)
             cmd.append('--change-address')
             cmd.append(change_address)
