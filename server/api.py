@@ -478,10 +478,13 @@ class EventSubmit(Resource):
             """
             # create the cmd
             cmd = ['cardano-cli', 'transaction', 'build']
+
+            # transaction inputs
             for t in transaction['inputs']:
                 cmd.append('--tx-in')
                 cmd.append(t)
-                applog.debug(t)
+
+            # transaction outputs
             for t in transaction['outputs']:
                 cmd.append('--tx-out')
                 cmd.append(t['address'] + '+' + str(t['lovelace']) + '+' + str(t[token_name]) + ' ' + token_name)
@@ -489,7 +492,18 @@ class EventSubmit(Resource):
                 output['address'] = t['address']
                 output['lovelace'] = t['lovelace']
                 output[token_name] = t[token_name]
-                applog.debug(output)
+
+            # outputs with other tokens in the input UTxOs
+            for t in transaction['other_tokens'].keys():
+                cmd.append('--tx-out')
+                cmd.append(change_address + '+' + str(calculate_min_ada(t)) + '+' +
+                           str(transaction['other_tokens'][t]) + ' ' + t)
+                output = {}
+                output['address'] = change_address
+                output['lovelace'] = calculate_min_ada(t)
+                output[t] = transaction['other_tokens'][t]
+                transaction['outputs'].append(output)
+
             cmd.append('--tx-out')
             cmd.append(change_address + '+' + str(EXTRA_LOVELACE) + '+' +
                        str(transaction['amount_tokens'] - spend_amounts[token_name]) + ' ' + str(token_name))
@@ -498,6 +512,7 @@ class EventSubmit(Resource):
             output['lovelace'] = EXTRA_LOVELACE
             output[token_name] = str(transaction['amount_tokens'] - spend_amounts[token_name])
             transaction['outputs'].append(output)
+
             cmd.append('--change-address')
             cmd.append(change_address)
             transaction['change_address'] = change_address
@@ -508,7 +523,6 @@ class EventSubmit(Resource):
             cmd.append(CARDANO_NET)
             if len(MAGIC_NUMBER) != 0:
                 cmd.append(str(MAGIC_NUMBER))
-
             out, err = cardano_cli_cmd(cmd)
             if err:
                 applog.error(err)
@@ -617,25 +631,22 @@ class EventSubmit(Resource):
                         else:
                             transaction['other_tokens'][item['token']] = int(item['amount'])
             for t in src_transactions:
-                if transaction['amount_lovelace'] > spend_amounts['lovelace'] + calculate_min_ada(token_name) + \
+                if transaction['amount_lovelace'] > spend_amounts['lovelace'] + \
+                        calculate_min_ada(token_name) * (len(transactions) + 1) + \
                         EXTRA_LOVELACE * (len(transactions) + 1):
                     break
                 transaction['inputs'].append(t['hash'] + '#' + t['id'])
                 transaction['amount_lovelace'] += int(t['amount'])
 
-            applog.debug('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-            applog.debug(transaction['amount_lovelace'])
-            applog.debug(transaction['amount_tokens'])
-            applog.debug(transaction['other_tokens'])
-            applog.debug('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-
             # create the cmd
             cmd = ['cardano-cli', 'transaction', 'build']
+            # transaction inputs
             for t in transaction['inputs']:
                 cmd.append('--tx-in')
                 cmd.append(t)
                 applog.debug(t)
 
+            # transaction outputs
             for t in transactions:
                 cmd.append('--tx-out')
                 cmd.append(first_src_address + '+' + str(t['total_amounts']['lovelace'] + EXTRA_LOVELACE) + '+' +
@@ -644,6 +655,17 @@ class EventSubmit(Resource):
                 output['address'] = first_src_address
                 output['lovelace'] = t['total_amounts']['lovelace']
                 output[token_name] = t['total_amounts'][token_name]
+                transaction['outputs'].append(output)
+
+            # outputs with other tokens in the input UTxOs
+            for t in transaction['other_tokens'].keys():
+                cmd.append('--tx-out')
+                cmd.append(change_address + '+' + str(calculate_min_ada(t)) + '+' +
+                           str(transaction['other_tokens'][t]) + ' ' + t)
+                output = {}
+                output['address'] = change_address
+                output['lovelace'] = calculate_min_ada(t)
+                output[t] = transaction['other_tokens'][t]
                 transaction['outputs'].append(output)
 
             cmd.append('--tx-out')
