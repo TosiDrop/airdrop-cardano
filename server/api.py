@@ -244,6 +244,11 @@ class EventSubmit(Resource):
 
         airdrop_hash = hashlib.sha256(str(data).encode()).hexdigest()
         applog.info('airdrop_hash: %s' % airdrop_hash)
+
+        # save the airdrop data for debugging
+        with open(FILES_PATH + '/airdrop_' + airdrop_hash + '.json', 'wb') as f:
+            f.write(data)
+
         src_addresses, change_address, airdrops_list, spend_amounts, dst_addresses, \
             token_name, amounts, out, err = parse_airdrop_data(data)
 
@@ -985,6 +990,7 @@ class EventGetTransactions(Resource):
         resp_transactions = []
         transaction_nr = 0
         transaction_fees = 0
+        used_utxos = []
         for trans in transactions:
             try:
                 trans_id = trans[0]
@@ -1027,10 +1033,15 @@ class EventGetTransactions(Resource):
                         applog.exception(exc)
                         continue
                     # found the right UTxO
-                    i_found = True
                     i = {}
                     i['hash'] = t['hash']
                     i['id'] = t['id']
+                    # if this UTxO was already selected for another transaction
+                    if i in used_utxos:
+                        continue
+                    # UTxO found
+                    i_found = True
+                    used_utxos.append(i)
                     inputs.append(i)
                     src_token_transactions.remove(t)
                     break
