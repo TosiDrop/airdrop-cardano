@@ -470,6 +470,25 @@ class EventSubmit(Resource):
                 transaction['inputs'].append(t['hash'] + '#' + t['id'])
                 transaction['amount_lovelace'] += int(t['amount'])
 
+            # if we don't have enough lovelaces in the inputs, add more inputs with tokens
+            while amount_lovelace < transaction['amount_lovelace'] + (calculate_min_ada(token_name) *
+                    (len(transaction['outputs']) + len(transaction['other_tokens']) + 1)):
+                for t in src_token_transactions:
+                    input = t['hash'] + '#' + t['id']
+                    if input in transaction['inputs']:
+                        continue
+                    transaction['inputs'].append(input)
+                    for item in t['amounts']:
+                        if item['token'] == 'lovelace':
+                            transaction['amount_lovelace'] += int(item['amount'])
+                        elif item['token'] == token_name:
+                            transaction['amount_tokens'] += int(item['amount'])
+                        else:
+                            if item['token'] in transaction['other_tokens']:
+                                transaction['other_tokens'][item['token']] += int(item['amount'])
+                            else:
+                                transaction['other_tokens'][item['token']] = int(item['amount'])
+
             """
             Calculate the amounts of lovelace, tokens and other tokens in all spent UTxOs
             """
@@ -634,6 +653,25 @@ class EventSubmit(Resource):
                     break
                 transaction['inputs'].append(t['hash'] + '#' + t['id'])
                 transaction['amount_lovelace'] += int(t['amount'])
+
+            # if we don't have enough lovelaces in the inputs, add more inputs with tokens
+            while amount_lovelace > transaction['amount_lovelace'] + (calculate_min_ada(token_name) *
+                    (len(transaction['outputs']) + len(transaction['other_tokens']) + 1)):
+                for t in src_token_transactions:
+                    input = t['hash'] + '#' + t['id']
+                    if input in transaction['inputs']:
+                        continue
+                    transaction['inputs'].append(input)
+                    for item in t['amounts']:
+                        if item['token'] == 'lovelace':
+                            transaction['amount_lovelace'] += int(item['amount'])
+                        elif item['token'] == token_name:
+                            transaction['amount_tokens'] += int(item['amount'])
+                        else:
+                            if item['token'] in transaction['other_tokens']:
+                                transaction['other_tokens'][item['token']] += int(item['amount'])
+                            else:
+                                transaction['other_tokens'][item['token']] = int(item['amount'])
 
             # create the cmd
             cmd = ['cardano-cli', 'transaction', 'build']
