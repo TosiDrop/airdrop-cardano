@@ -318,11 +318,18 @@ def wait_for_transaction(txid, address, airdrop_id, trans_id, name, applog):
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
     now = datetime.datetime.now()
-    status = name.replace('_', ' ') + ' adopted'
-    cur.execute("UPDATE airdrops SET status = ?, date = ? WHERE id = ?",
-                (status, now, airdrop_id))
+
     cur.execute("UPDATE transactions SET status = 'transaction adopted', date = ? WHERE id = ?",
                 (now, trans_id))
+    cur.execute("SELECT COUNT(*) FROM transactions WHERE airdrop_id = ? AND status <> 'transaction adopted'",
+                (airdrop_id,))
+    nr = cur.fetchone()[0]
+    if nr > 0:
+        status = name.replace('_', ' ') + ' adopted'
+    else:
+        status = 'airdrop finished'
+    cur.execute("UPDATE airdrops SET status = ?, date = ? WHERE id = ?",
+                (status, now, airdrop_id))
     conn.commit()
     conn.close()
     return

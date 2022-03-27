@@ -421,14 +421,6 @@ class EventSubmit(Resource):
                 input_list[idx], input_list[max_idx] = input_list[max_idx], input_list[idx]
         selection_sort(src_token_transactions)
 
-        """"
-        applog.debug('======================')
-        applog.debug(tokens_amounts)
-        for item in src_token_transactions:
-            applog.debug(item)
-        applog.debug('======================')
-        """
-
         """
         Write the airdrop information and the transaction information in the database
         """
