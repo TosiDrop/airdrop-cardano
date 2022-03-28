@@ -471,7 +471,7 @@ class EventSubmit(Resource):
                 transaction['amount_lovelace'] += int(t['amount'])
 
             # if we don't have enough lovelaces in the inputs, add more inputs with tokens
-            while amount_lovelace < transaction['amount_lovelace'] + (calculate_min_ada(token_name) *
+            if transaction['amount_lovelace'] < amount_lovelace + (calculate_min_ada(token_name) *
                     (len(transaction['outputs']) + len(transaction['other_tokens']) + 1)):
                 for t in src_token_transactions:
                     input = t['hash'] + '#' + t['id']
@@ -488,6 +488,9 @@ class EventSubmit(Resource):
                                 transaction['other_tokens'][item['token']] += int(item['amount'])
                             else:
                                 transaction['other_tokens'][item['token']] = int(item['amount'])
+                    if transaction['amount_lovelace'] > amount_lovelace + (calculate_min_ada(token_name) *
+                            (len(transaction['outputs']) + len(transaction['other_tokens']) + 1)):
+                        break
 
             """
             Calculate the amounts of lovelace, tokens and other tokens in all spent UTxOs
@@ -539,12 +542,15 @@ class EventSubmit(Resource):
             cmd.append(CARDANO_NET)
             if len(MAGIC_NUMBER) != 0:
                 cmd.append(str(MAGIC_NUMBER))
+            cmd_string = ' '.join(cmd)
+            applog.debug(cmd_string)
             out, err = cardano_cli_cmd(cmd)
             if err:
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
                 msg['CODE'] = 'SERVER_ERROR'
+                msg['cmd'] = cmd_string
                 return msg, 503
             applog.info(out)
             transaction_fee = out.strip().split(' ')[-1]
@@ -655,7 +661,7 @@ class EventSubmit(Resource):
                 transaction['amount_lovelace'] += int(t['amount'])
 
             # if we don't have enough lovelaces in the inputs, add more inputs with tokens
-            while amount_lovelace > transaction['amount_lovelace'] + (calculate_min_ada(token_name) *
+            if transaction['amount_lovelace'] < amount_lovelace + (calculate_min_ada(token_name) *
                     (len(transaction['outputs']) + len(transaction['other_tokens']) + 1)):
                 for t in src_token_transactions:
                     input = t['hash'] + '#' + t['id']
@@ -672,6 +678,9 @@ class EventSubmit(Resource):
                                 transaction['other_tokens'][item['token']] += int(item['amount'])
                             else:
                                 transaction['other_tokens'][item['token']] = int(item['amount'])
+                    if transaction['amount_lovelace'] > amount_lovelace + (calculate_min_ada(token_name) *
+                            (len(transaction['outputs']) + len(transaction['other_tokens']) + 1)):
+                        break
 
             # create the cmd
             cmd = ['cardano-cli', 'transaction', 'build']
@@ -721,12 +730,15 @@ class EventSubmit(Resource):
             cmd.append(CARDANO_NET)
             if len(MAGIC_NUMBER) != 0:
                 cmd.append(str(MAGIC_NUMBER))
+            cmd_string = ' '.join(cmd)
+            applog.debug(cmd_string)
             out, err = cardano_cli_cmd(cmd)
             if err:
                 applog.error(err)
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
                 msg['CODE'] = 'SERVER_ERROR'
+                msg['cmd'] = cmd_string
                 return msg, 503
             applog.info(out)
             transaction_fee = out.strip().split(' ')[-1]
@@ -1118,6 +1130,8 @@ class EventGetTransactions(Resource):
             cmd.append(CARDANO_NET)
             if len(MAGIC_NUMBER) != 0:
                 cmd.append(str(MAGIC_NUMBER))
+            cmd_string = ' '.join(cmd)
+            applog.debug(cmd_string)
             out, err = cardano_cli_cmd(cmd)
             if err:
                 applog.error(err)
@@ -1128,6 +1142,7 @@ class EventGetTransactions(Resource):
                 msg = {}
                 msg['error'] = 'Server error: %s' % err
                 msg['CODE'] = 'SERVER_ERROR'
+                msg['cmd'] = cmd_string
                 return msg, 503
             applog.info(out)
             transaction_fees += int(out.strip().split(' ')[-1])

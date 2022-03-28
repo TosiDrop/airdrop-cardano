@@ -21,7 +21,7 @@ PROTOCOL_FILE = os.getenv('PROTOCOL_FILE', FILES_PATH + '/protocol-parameters.js
 # default transaction validity time
 TRANSACTION_EXPIRE = os.getenv('TRANSACTION_EXPIRE', 86400)
 # max numbers of UTxOs to use in a transaction
-MAX_IN_UTXOS = os.getenv('MAX_IN_UTXOS', 250)
+MAX_IN_UTXOS = os.getenv('MAX_IN_UTXOS', 100000)
 # sleep timeout during various steps of the script
 SLEEP_TIMEOUT = os.getenv('SLEEP_TIMEOUT', 5)
 # api port
