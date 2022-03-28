@@ -124,7 +124,7 @@ export default function useWallet() {
       dispatch(setAddressContainingAda(addressContainingAda));
       dispatch(setTokenArray(tokenArray));
     } catch (err) {
-      setPopUpError("Something is wrong")
+      setPopUpError("Something is wrong");
     }
   };
 

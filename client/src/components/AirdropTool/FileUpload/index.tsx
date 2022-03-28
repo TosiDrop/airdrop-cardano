@@ -40,7 +40,7 @@ export default function FileUpload() {
 }
 
 function csvToArray(csv: string): string[] {
-  csv = csv.replaceAll('\r', '') // for windows line ending
+  csv = csv.replaceAll("\r", ""); // for windows line ending
   const parsedCsv = csv.split("\n");
   if (parsedCsv[parsedCsv.length - 1] === "") parsedCsv.pop();
   return parsedCsv;

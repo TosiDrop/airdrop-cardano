@@ -8,6 +8,7 @@ import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
 import {
   resetSelectedToken,
+  setDarkTheme,
   setLoadingApi,
   setTokenArray,
 } from "reducers/globalSlice";
@@ -41,6 +42,10 @@ function App() {
         console.log("wallet not ready");
       }
     }, 100);
+    const darkMode = localStorage.getItem("darkMode");
+    if (darkMode === "true") {
+      dispatch(setDarkTheme(true));
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

@@ -29,8 +29,9 @@ export const globalSlice = createSlice({
   name: "global",
   initialState,
   reducers: {
-    toggleTheme: (state) => {
-      state.darkTheme = !state.darkTheme;
+    setDarkTheme: (state, { payload }: PayloadAction<boolean>) => {
+      state.darkTheme = payload;
+      localStorage.setItem("darkMode", payload.toString());
     },
     setTokenArray: (state, { payload }: PayloadAction<Token[]>) => {
       state.tokenArray = payload;
@@ -70,7 +71,7 @@ export const globalSlice = createSlice({
 });
 
 export const {
-  toggleTheme,
+  setDarkTheme,
   resetSelectedToken,
   setTokenArray,
   setSelectedToken,

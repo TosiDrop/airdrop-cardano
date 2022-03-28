@@ -1,11 +1,14 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import { Switch } from "@arco-design/web-react";
 import { IconSun, IconMoon } from "@arco-design/web-react/icon";
 import useDualThemeClass from "hooks/useDualThemeClass";
-import { toggleTheme } from "reducers/globalSlice";
+import { setDarkTheme } from "reducers/globalSlice";
 import "./index.scss";
 
 export default function ThemeSwitch() {
+  const darkMode = useSelector(
+    (state: RootStateOrAny) => state.global.darkTheme
+  );
   const dispatch = useDispatch();
   const [CLASS, EL_CLASS] = useDualThemeClass({
     main: "theme-switch",
@@ -16,9 +19,10 @@ export default function ThemeSwitch() {
     <div className={CLASS}>
       <IconSun></IconSun>
       <Switch
-        onChange={() => {
-          dispatch(toggleTheme());
+        onChange={(v) => {
+          dispatch(setDarkTheme(v));
         }}
+        checked={darkMode}
         className={EL_CLASS}
       />
       <IconMoon></IconMoon>
