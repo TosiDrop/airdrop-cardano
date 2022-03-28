@@ -122,6 +122,9 @@ class EventValidate(Resource):
             return msg, 406
         src_addresses, change_address, airdrops_list, spend_amounts, dst_addresses, \
             token_name, amounts, out, err = parse_airdrop_data(data)
+
+        applog.debug('Source addresses: %s' % src_addresses)
+
         if err:
             msg = {}
             msg['error'] = err
@@ -164,7 +167,7 @@ class EventValidate(Resource):
         applog.info('Source transactions: %s' % src_transactions)
         applog.info('Source token transactions: %s' % src_token_transactions)
         applog.info('Amounts available: %s' % tokens_amounts)
-        applog.info('Amounts to spend: %s' % spend_amounts)
+        applog.info('Amounts to spend:  %s' % spend_amounts)
 
         # validate transaction
         if not validate_transaction(spend_amounts, tokens_amounts):
@@ -251,6 +254,8 @@ class EventSubmit(Resource):
 
         src_addresses, change_address, airdrops_list, spend_amounts, dst_addresses, \
             token_name, amounts, out, err = parse_airdrop_data(data)
+
+        applog.debug('Source addresses: %s' % src_addresses)
 
         if err:
             msg = {}
