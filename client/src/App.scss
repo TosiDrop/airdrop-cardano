@@ -22,3 +22,21 @@
 .container-light {
   color: var(--lt-color);
 }
+
+.tosidrop-btn {
+  border-radius: var(--border-radius-small);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  &-light {
+    background: var(--lt-btn-color) !important;
+    border-width: 0px !important;
+    color: var(--dt-color) !important;
+  }
+  &-dark {
+    background: var(--dt-btn-color) !important;
+    border-width: 0px !important;
+    color: var(--lt-color) !important;
+  }
+}

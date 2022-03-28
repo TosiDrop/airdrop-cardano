@@ -4,11 +4,11 @@ export default function useDualThemeClassBtn() {
   const darkTheme = useSelector(
     (state: RootStateOrAny) => state.global.darkTheme
   );
-  const MAIN_CLASS = 'tosidrop-btn';
+  const MAIN_CLASS = "tosidrop-btn";
 
   if (darkTheme) {
-    return `${MAIN_CLASS} ${MAIN_CLASS}-dark` 
+    return `${MAIN_CLASS} ${MAIN_CLASS}-dark`;
   } else {
-    return `${MAIN_CLASS} ${MAIN_CLASS}-light` 
+    return `${MAIN_CLASS} ${MAIN_CLASS}-light`;
   }
 }

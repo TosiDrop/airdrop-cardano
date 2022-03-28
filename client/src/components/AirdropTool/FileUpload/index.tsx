@@ -1,41 +1,48 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
-import { Upload, Button } from "@arco-design/web-react";
-import { UploadItem } from "@arco-design/web-react/es/Upload";
 import { setAddressArray } from "reducers/globalSlice";
 import { AddressAmount } from "utils";
-import "./index.scss";
+import useDualThemeClassBtn from "hooks/useDualThemeClassBtn";
+import usePopUp from "hooks/usePopUp";
 
 export default function FileUpload() {
-  const [fileList, setFileList] = useState<UploadItem[]>([]);
+  const file = useRef<any>(null)
+  const [fileParsed, setFileParsed] = useState(false)
   const dispatch = useDispatch();
+  const { setPopUpError } = usePopUp()
 
-  const parseFile = useCallback(() => {
-    const reader = new FileReader();
-    const file = fileList[0].originFile as Blob;
-    reader.readAsText(file);
-    reader.onload = function () {
-      const addressAmountParsed = csvToArray(reader.result as string);
-      const addressAmountArray = splitAmountArray(addressAmountParsed);
-      dispatch(setAddressArray(addressAmountArray));
-    };
-  }, [dispatch, fileList]);
+  const parseFile = () => {
+    try {
+      const uploadedFile = file.current.files[0]
+      const reader = new FileReader();
+      reader.readAsText(uploadedFile);
+      reader.onload = function () {
+        const addressAmountParsed = csvToArray(reader.result as string);
+        const addressAmountArray = splitAmountArray(addressAmountParsed);
+        dispatch(setAddressArray(addressAmountArray));
+        setFileParsed(true)
+      };
+    } catch (e) {
+      setPopUpError('File format is incorrect')
+    }
+  }
 
-  useEffect(() => {
-    if (!fileList.length) return;
-    parseFile();
-  }, [fileList, dispatch, parseFile]);
+  const handleUploadClick = () => {
+    if (fileParsed) {
+      file.current.value = null
+      dispatch(setAddressArray([]));
+    }
+  }
 
   return (
-    <Upload
-      showUploadList={false}
-      className="file-upload"
-      fileList={fileList}
-      onChange={setFileList}
-      accept=".csv"
-    >
-      <Button>Add addresses</Button>
-    </Upload>
+    <>
+    <input ref={file} id="file-upload" type='file' accept=".csv" onChange={() => parseFile()} hidden/>
+    <label className={useDualThemeClassBtn()} htmlFor="file-upload">
+      {
+        fileParsed ? 'Upload new addresses' : 'Upload addresses'
+      }
+    </label>
+    </>
   );
 }
 
