@@ -201,12 +201,16 @@ export default function AirdropTool() {
   };
 
   const submit_transaction = async (txJson: any, url: any) => {
-    const txSubmit = await axios.post(
-      `${url}/api/v0/submit_transaction`,
-      txJson
-    );
-    const submission = txSubmit.data;
-    return submission;
+    try {
+      const txSubmit = await axios.post(
+        `${url}/api/v0/submit_transaction`,
+        txJson
+      );
+      const submission = txSubmit.data;
+      return submission;
+    } catch (e) {
+      console.log(e)
+    }
   };
 
   const validateAirdropRequest = async () => {
