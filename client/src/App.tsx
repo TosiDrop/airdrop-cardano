@@ -55,7 +55,7 @@ function App() {
      */
     (async function () {
       if (api == null) return;
-      let address = await api.getChangeAddress();
+      let address = (await api.getUsedAddresses())[0];
 
       /**
        * if api changes, set tokenArrayInWallet to []
