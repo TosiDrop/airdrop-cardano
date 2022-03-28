@@ -17,6 +17,7 @@ import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
 import { Buffer } from "buffer";
 import usePopUp from "hooks/usePopUp";
 import "App.scss";
+import TransactionTracker from "components/TransactionTracker";
 
 function App() {
   const { setPopUpError } = usePopUp();
@@ -84,6 +85,7 @@ function App() {
       <div className={CONTAINER_CLASS}>
         <Navbar></Navbar>
         <AirdropTool></AirdropTool>
+        <TransactionTracker></TransactionTracker>
         <PopUp></PopUp>
       </div>
     </div>
