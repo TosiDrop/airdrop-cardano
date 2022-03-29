@@ -1,6 +1,7 @@
 import { useSelector, RootStateOrAny } from "react-redux";
 import { Button } from "@arco-design/web-react";
 import { IconSend } from "@arco-design/web-react/icon";
+import { ClassNames } from "utils";
 import "./index.scss";
 
 const COMPONENT_CLASS = "token-detail";
@@ -57,6 +58,7 @@ export default function TokenDetail({
       ) : null}
       <div className={`${COMPONENT_CLASS}__row`}>
         <Button
+          className={ClassNames.TOSIDROP_BTN}
           onClick={() => validateAirdropRequest()}
           disabled={
             totalAmountToAirdrop === 0 ||
@@ -69,7 +71,11 @@ export default function TokenDetail({
         </Button>
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
-        <Button onClick={() => sendToken()} disabled={!isAbleToAirdrop}>
+        <Button
+          className={ClassNames.TOSIDROP_BTN}
+          onClick={() => sendToken()}
+          disabled={!isAbleToAirdrop}
+        >
           Airdrop
           <IconSend />
         </Button>

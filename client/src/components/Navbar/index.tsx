@@ -4,7 +4,7 @@ import ThemeSwitch from "components/Navbar/ThemeSwitch";
 import { Button, Popover } from "@arco-design/web-react";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
-import { supportedWallets, shortenAddress } from "utils";
+import { supportedWallets, shortenAddress, ClassNames } from "utils";
 import Logo from "assets/logo.png";
 import "./index.scss";
 
@@ -63,7 +63,7 @@ export default function Navbar() {
         title="Select Wallet"
         content={selectWalletBtns()}
       >
-        <Button className={EL_CLASS}>
+        <Button className={ClassNames.TOSIDROP_BTN}>
           {btnText}
           {loadingApi ? <div className="lds-dual-ring"></div> : null}
         </Button>

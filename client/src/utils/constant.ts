@@ -20,3 +20,7 @@ export const defaultToken = {
   nameHex: "",
   addressContainingToken: [],
 };
+
+export const ClassNames = {
+  TOSIDROP_BTN: "tosidrop-btn",
+};

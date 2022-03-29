@@ -1,4 +1,4 @@
-import { useEffect,useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import Navbar from "components/Navbar";
 import AirdropTool from "components/AirdropTool";
@@ -20,7 +20,7 @@ import TransactionTracker from "components/TransactionTracker";
 import useDualThemeClassV2 from "hooks/useDualThemeClassV2";
 import "css/App.scss";
 
-const COMPONENT_CLASS = 'app-container'
+const COMPONENT_CLASS = "app-container";
 
 function App() {
   const dispatch = useDispatch();

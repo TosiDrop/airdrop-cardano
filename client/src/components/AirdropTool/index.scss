@@ -40,20 +40,4 @@
     flex: 1 1;
     margin-right: var(--std-separator-width-half);
   }
-
-  &-dark {
-    button {
-      background: var(--dt-btn-color) !important;
-      border-width: 0px !important;
-      color: var(--lt-color) !important;
-    }
-  }
-
-  &-light {
-    button {
-      background: var(--lt-btn-color) !important;
-      border-width: 0px !important;
-      color: var(--dt-color) !important;
-    }
-  }
 }

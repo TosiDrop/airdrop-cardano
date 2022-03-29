@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { setAddressArray } from "reducers/globalSlice";
-import useDualThemeClassBtn from "hooks/useDualThemeClassBtn";
 import usePopUp from "hooks/usePopUp";
 import { csvToArray, splitAmountArray } from "./helper";
+import { ClassNames } from "utils";
 
 export default function FileUpload() {
   const file = useRef<any>(null);
@@ -37,7 +37,7 @@ export default function FileUpload() {
         onChange={() => parseFile()}
         hidden
       />
-      <label className={useDualThemeClassBtn()} htmlFor="file-upload">
+      <label className={ClassNames.TOSIDROP_BTN} htmlFor="file-upload">
         {fileParsed ? "Upload new addresses" : "Upload addresses"}
       </label>
     </>

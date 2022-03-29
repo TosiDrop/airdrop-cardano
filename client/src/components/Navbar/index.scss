@@ -40,22 +40,6 @@
   }
 }
 
-.navbar-dark {
-  &__button {
-    background: var(--dt-btn-color) !important;
-    border-width: 0px !important;
-    color: var(--lt-color) !important;
-  }
-}
-
-.navbar-light {
-  &__button {
-    background: var(--lt-btn-color) !important;
-    border-width: 0px !important;
-    color: var(--dt-color) !important;
-  }
-}
-
 .lds-dual-ring {
   display: inline-block;
   box-sizing: border-box;
