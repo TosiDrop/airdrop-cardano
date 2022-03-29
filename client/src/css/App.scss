@@ -5,6 +5,14 @@
   justify-content: center;
 }
 
+.App-dark {
+  background: var(--dark-gradient);
+}
+
+.App-light {
+  background: var(--light-gradient);
+}
+
 .app-container {
   width: 100%;
   max-width: 1200px;

@@ -3,7 +3,6 @@ import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import Navbar from "components/Navbar";
 import AirdropTool from "components/AirdropTool";
 import PopUp from "components/PopUp";
-import useBackgroundImage from "hooks/useBackgroundImage";
 import useWallet from "hooks/useWallet";
 import {
   resetSelectedToken,
@@ -19,12 +18,14 @@ import TransactionTracker from "components/TransactionTracker";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import "css/App.scss";
 
-const COMPONENT_CLASS = "app-container";
+const APP = "App"
+const APP_CONTAINER = "app-container";
 
 function App() {
   const dispatch = useDispatch();
   const api = useSelector((state: RootStateOrAny) => state.global.api);
-  const CONTAINER_CLASS = useDualThemeClass({ className: COMPONENT_CLASS });
+  const CONTAINER_CLASS = useDualThemeClass({ className: APP_CONTAINER });
+  const APP_CLASS = useDualThemeClass({ className: APP });
   const { setPopUpError } = usePopUp();
   const { getTokenArrayInWallet, enableWallet } = useWallet();
 
@@ -83,7 +84,7 @@ function App() {
   }, [api]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="App" style={useBackgroundImage()}>
+    <div className={APP_CLASS}>
       <div className={CONTAINER_CLASS}>
         <Navbar></Navbar>
         <AirdropTool></AirdropTool>
