@@ -61,20 +61,10 @@
 
   &-dark {
     background: var(--dt-bg-color);
-    button {
-      background: var(--dt-btn-color) !important;
-      border-width: 0px !important;
-      color: var(--lt-color) !important;
-    }
   }
 
   &-light {
     background: var(--lt-bg-color);
-    button {
-      background: var(--lt-btn-color) !important;
-      border-width: 0px !important;
-      color: var(--dt-color) !important;
-    }
   }
 }
 

@@ -1,6 +1,6 @@
 import useDualThemeClass from "hooks/useDualThemeClass";
 import Logo from "assets/logo.png";
-import { PopUpType } from "utils";
+import { ClassNames, PopUpType } from "utils";
 import { Button } from "@arco-design/web-react";
 import { IconCheckCircle, IconCloseCircle } from "@arco-design/web-react/icon";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
@@ -15,9 +15,8 @@ export default function PopUp() {
   const { show, text, type } = popUp;
   const { closePopUp } = usePopUp();
 
-  const [CLASS, EL_CLASS] = useDualThemeClass({
-    main: CONTAINER_CLASS,
-    el: "btn",
+  const CLASS = useDualThemeClass({
+    className: CONTAINER_CLASS
   });
 
   const getLogoClass = () => {
@@ -57,7 +56,7 @@ export default function PopUp() {
       <div className={`${CLASS} ${getVisibilityClass(show, CONTAINER_CLASS)}`}>
         <h2>{text}</h2>
         {getSymbol(type)}
-        <Button onClick={() => closePopUp()} className={EL_CLASS}>
+        <Button onClick={() => closePopUp()} className={ClassNames.TOSIDROP_BTN}>
           Close
         </Button>
       </div>

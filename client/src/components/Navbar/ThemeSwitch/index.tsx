@@ -5,14 +5,15 @@ import useDualThemeClass from "hooks/useDualThemeClass";
 import { setDarkTheme } from "reducers/globalSlice";
 import "./index.scss";
 
+const COMPONENT_CLASS = "theme-switch"
+
 export default function ThemeSwitch() {
   const darkMode = useSelector(
     (state: RootStateOrAny) => state.global.darkTheme
   );
   const dispatch = useDispatch();
-  const [CLASS, EL_CLASS] = useDualThemeClass({
-    main: "theme-switch",
-    el: "switch",
+  const CLASS = useDualThemeClass({
+    className: COMPONENT_CLASS
   });
 
   return (
@@ -23,7 +24,7 @@ export default function ThemeSwitch() {
           dispatch(setDarkTheme(v));
         }}
         checked={darkMode}
-        className={EL_CLASS}
+        className={`${COMPONENT_CLASS}__switch`}
       />
       <IconMoon></IconMoon>
     </div>

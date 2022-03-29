@@ -11,9 +11,8 @@ import "./index.scss";
 const CONTAINER_CLASS = "navbar";
 
 export default function Navbar() {
-  const [CLASS, EL_CLASS] = useDualThemeClass({
-    main: CONTAINER_CLASS,
-    el: "button",
+  const CLASS = useDualThemeClass({
+    className: CONTAINER_CLASS
   });
   const { enableWallet } = useWallet();
   const [btnText, setBtnText] = useState("Connect wallet");

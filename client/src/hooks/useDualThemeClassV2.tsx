@@ -4,7 +4,7 @@ interface Props {
   className: string;
 }
 
-export default function useDualThemeClassV2({ className }: Props) {
+export default function useDualThemeClass({ className }: Props) {
   const darkTheme = useSelector(
     (state: RootStateOrAny) => state.global.darkTheme
   );

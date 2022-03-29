@@ -4,7 +4,7 @@ import "./index.scss";
 const COMPONENT_CLASS = "tx-tracker";
 
 const TransactionTracker = () => {
-  const [CLASS] = useDualThemeClass({ main: COMPONENT_CLASS, el: "" });
+  const CLASS = useDualThemeClass({ className: COMPONENT_CLASS });
   return (
     <div className={CLASS}>
       <div className={`${COMPONENT_CLASS}__row`}>

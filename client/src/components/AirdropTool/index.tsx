@@ -27,10 +27,7 @@ export default function AirdropTool() {
   const [adaToSpend, setAdaToSpend] = useState(0);
   const [isAbleToAirdrop, setTsAbleToAirdrop] = useState(false);
 
-  const [CLASS, CHILD_CLASS] = useDualThemeClass({
-    main: COMPONENT_CLASS,
-    el: "child",
-  });
+  const CLASS = useDualThemeClass({ className: COMPONENT_CLASS })
 
   const {
     selectedToken,
@@ -102,19 +99,19 @@ export default function AirdropTool() {
 
   return (
     <div className={CLASS}>
-      <div className={`${COMPONENT_CLASS}__row ${CHILD_CLASS}`}>
+      <div className={`${COMPONENT_CLASS}__row`}>
         <h2>Airdrop Parameters</h2>
       </div>
       <div
-        className={`${COMPONENT_CLASS}__token_input ${COMPONENT_CLASS}__row ${CHILD_CLASS}`}
+        className={`${COMPONENT_CLASS}__token_input ${COMPONENT_CLASS}__row`}
       >
         <TokenSelect />
         <FileUpload></FileUpload>
       </div>
-      <div className={`${COMPONENT_CLASS}__row ${CHILD_CLASS}`}>
+      <div className={`${COMPONENT_CLASS}__row`}>
         <AddressList></AddressList>
       </div>
-      <div className={`${COMPONENT_CLASS}__row ${CHILD_CLASS}`}>
+      <div className={`${COMPONENT_CLASS}__row`}>
         <TokenDetail
           adaToSpend={adaToSpend}
           fee={txFee}

@@ -4,7 +4,6 @@ import Navbar from "components/Navbar";
 import AirdropTool from "components/AirdropTool";
 import PopUp from "components/PopUp";
 import useBackgroundImage from "hooks/useBackgroundImage";
-import useDualThemeClass from "hooks/useDualThemeClass";
 import useWallet from "hooks/useWallet";
 import {
   resetSelectedToken,
@@ -17,7 +16,7 @@ import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
 import { Buffer } from "buffer";
 import usePopUp from "hooks/usePopUp";
 import TransactionTracker from "components/TransactionTracker";
-import useDualThemeClassV2 from "hooks/useDualThemeClassV2";
+import useDualThemeClass from "hooks/useDualThemeClass";
 import "css/App.scss";
 
 const COMPONENT_CLASS = "app-container";
@@ -25,7 +24,7 @@ const COMPONENT_CLASS = "app-container";
 function App() {
   const dispatch = useDispatch();
   const api = useSelector((state: RootStateOrAny) => state.global.api);
-  const CONTAINER_CLASS = useDualThemeClassV2({ className: COMPONENT_CLASS });
+  const CONTAINER_CLASS = useDualThemeClass({ className: COMPONENT_CLASS });
   const { setPopUpError } = usePopUp();
   const { getTokenArrayInWallet, enableWallet } = useWallet();
 
