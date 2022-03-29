@@ -3,26 +3,41 @@
   height: 100%;
   display: flex;
   justify-content: center;
-  // overwrite arco-design var
-  --border-radius-small: 3px;
 }
 
-.container {
+.app-container {
   width: 100%;
   max-width: 1200px;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  // Variables
+  --border-radius-small: 3px;
+  --std-box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
+    rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+  --semi-transparent: rgba(255, 255, 255, 0.1);
+  --std-separator-width: 10px;
+  --std-separator-width-half: 5px;
+  --dt-color: var(--light-color); //remove
+  --lt-color: var(--dark-color); //remove
+  --dt-btn-color: var(--light-gradient); //remove
+  --lt-btn-color: var(--dark-gradient); //remove
+  --dt-bg-color: var(--dark-gradient); //remove
+  --lt-bg-color: var(--light-gradient); //remove
 }
 
-.container-dark {
-  color: var(--dt-color);
-  --btn-text: #143544;
+// Handle theme switch
+.app-container-dark {
+  color: var(--light-color);
+  --btn-text-color: var(--dark-color);
+  --btn-bg-color: var(--light-gradient);
 }
 
-.container-light {
-  color: var(--lt-color);
-  --btn-text: #ffffff;
+.app-container-light {
+  color: var(--dark-color);
+  --btn-text-color: var(--light-color);
+  --btn-bg-color: var(--dark-gradient);
 }
 
 .tosidrop-btn {
@@ -31,14 +46,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  &-light {
-    background: var(--lt-btn-color) !important;
-    border-width: 0px !important;
-    color: var(--dt-color) !important;
-  }
-  &-dark {
-    background: var(--dt-btn-color) !important;
-    border-width: 0px !important;
-    color: var(--lt-color) !important;
-  }
+  background: var(--btn-bg-color) !important;
+  color: var(--btn-text-color) !important;
+  border-width: 0px !important;
 }

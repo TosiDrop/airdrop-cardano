@@ -16,14 +16,17 @@ import { setWalletAddress, setPopUp } from "reducers/globalSlice";
 import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
 import { Buffer } from "buffer";
 import usePopUp from "hooks/usePopUp";
-import "css/App.scss";
 import TransactionTracker from "components/TransactionTracker";
+import useDualThemeClassV2 from "hooks/useDualThemeClassV2";
+import "css/App.scss";
+
+const COMPONENT_CLASS = 'app-container'
 
 function App() {
-  const { setPopUpError } = usePopUp();
-  const CONTAINER_CLASS = useDualThemeClass({ main: "container", el: "" })[0];
   const dispatch = useDispatch();
   const api = useSelector((state: RootStateOrAny) => state.global.api);
+  const CONTAINER_CLASS = useDualThemeClassV2({ className: COMPONENT_CLASS });
+  const { setPopUpError } = usePopUp();
   const { getTokenArrayInWallet, enableWallet } = useWallet();
 
   useLayoutEffect(() => {
