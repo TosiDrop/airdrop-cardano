@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect,useLayoutEffect } from "react";
 import { useDispatch, useSelector, RootStateOrAny } from "react-redux";
 import Navbar from "components/Navbar";
 import AirdropTool from "components/AirdropTool";
@@ -26,7 +26,7 @@ function App() {
   const api = useSelector((state: RootStateOrAny) => state.global.api);
   const { getTokenArrayInWallet, enableWallet } = useWallet();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     /**
      * Use setInterval so we can retry if wallet
      * does not want to connect
