@@ -62,9 +62,9 @@ export default function Navbar() {
         title="Select Wallet"
         content={selectWalletBtns()}
       >
-        <Button className={ClassNames.TOSIDROP_BTN}>
+        <Button className={`${ClassNames.TOSIDROP_BTN} ${CONTAINER_CLASS}__button`}>
           {btnText}
-          {loadingApi ? <div className="lds-dual-ring"></div> : null}
+          {!loadingApi ? <div className="lds-dual-ring"></div> : null}
         </Button>
       </Popover>
       <img className={`${CONTAINER_CLASS}__logo`} src={Logo} alt="logo"></img>
