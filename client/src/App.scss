@@ -17,10 +17,12 @@
 
 .container-dark {
   color: var(--dt-color);
+  --btn-text: #143544;
 }
 
 .container-light {
   color: var(--lt-color);
+  --btn-text: #ffffff;
 }
 
 .tosidrop-btn {
