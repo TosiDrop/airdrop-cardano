@@ -16,7 +16,7 @@ import { setWalletAddress, setPopUp } from "reducers/globalSlice";
 import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
 import { Buffer } from "buffer";
 import usePopUp from "hooks/usePopUp";
-import "App.scss";
+import "css/App.scss";
 import TransactionTracker from "components/TransactionTracker";
 
 function App() {
