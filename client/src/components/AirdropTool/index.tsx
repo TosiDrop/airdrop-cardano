@@ -16,7 +16,7 @@ import {
   transact,
 } from "./helper";
 import "./index.scss";
-import TransactionTracker from "./TransactionTracker";
+import AirdropTransaction from "./AirdropTransaction";
 
 const COMPONENT_CLASS = "airdrop-tool";
 
@@ -45,7 +45,6 @@ export default function AirdropTool() {
     const requestBody = prepareBody(
       selectedToken,
       addressArray,
-      totalAmountToAirdrop,
       addressContainingAda
     );
 
@@ -83,7 +82,6 @@ export default function AirdropTool() {
     const requestBody = prepareBody(
       selectedToken,
       addressArray,
-      totalAmountToAirdrop,
       addressContainingAda
     );
 
@@ -136,7 +134,6 @@ export default function AirdropTool() {
       }
       const remainingAirdropTxs = await getAirdrop(airdropHash);
       setTxToSign(remainingAirdropTxs);
-      console.log(remainingAirdropTxs);
       // let cborHex, txId;
       // for (let tx of remainingAirdropTxs) {
       //   cborHex = tx.cborHex;
@@ -173,7 +170,11 @@ export default function AirdropTool() {
         ></TokenDetail>
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
-        {txToSign.length ? <TransactionTracker></TransactionTracker> : null}
+        {txToSign.length
+          ? txToSign.map((tx) => (
+              <AirdropTransaction tx={tx} api={api}></AirdropTransaction>
+            ))
+          : null}
       </div>
     </div>
   );

@@ -17,29 +17,9 @@ const url = process.env.REACT_APP_API_TX;
 export const prepareBody = (
   selectedToken: Token,
   addressArray: AddressAmount[],
-  totalAmountToAirdrop: number,
   addressContainingAda: AddressAmount[]
 ) => {
-  const sourceAddresses = [];
-  let estimatedAdaNeeded = (2 + addressArray.length * 2) * Math.pow(10, 6);
-  let totalAmountToAirdropInCompleteDecimal = totalAmountToAirdrop;
-
-  for (let addressAmountObject of selectedToken.addressContainingToken) {
-    if (totalAmountToAirdropInCompleteDecimal < 0 && estimatedAdaNeeded < 0)
-      break;
-    totalAmountToAirdropInCompleteDecimal -= addressAmountObject.amount;
-    if (addressAmountObject.adaAmount) {
-      estimatedAdaNeeded -= addressAmountObject.adaAmount;
-    }
-    sourceAddresses.push(addressAmountObject.address);
-  }
-
-  for (let addressAmountObject of addressContainingAda) {
-    if (estimatedAdaNeeded < 0) break;
-    if (!sourceAddresses.includes(addressAmountObject.address)) {
-      estimatedAdaNeeded -= addressAmountObject.amount;
-    }
-  }
+  const sourceAddresses = addressContainingAda.map((addr) => addr.address);
 
   const body: AirdropRequestBody = {
     source_addresses: sourceAddresses,
