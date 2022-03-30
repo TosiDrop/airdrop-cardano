@@ -14,7 +14,6 @@ import { setWalletAddress, setPopUp } from "reducers/globalSlice";
 import { Address } from "@emurgo/cardano-serialization-lib-asmjs";
 import { Buffer } from "buffer";
 import usePopUp from "hooks/usePopUp";
-import TransactionTracker from "components/TransactionTracker";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import "css/App.scss";
 
@@ -88,7 +87,6 @@ function App() {
       <div className={CONTAINER_CLASS}>
         <Navbar></Navbar>
         <AirdropTool></AirdropTool>
-        <TransactionTracker></TransactionTracker>
         <PopUp></PopUp>
       </div>
     </div>

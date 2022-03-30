@@ -73,6 +73,12 @@ export interface AssetDetailFromAPI {
   name_hex: string;
 }
 
+export interface TransactionInfo {
+  description: string;
+  type: string;
+  cborHex: string;
+}
+
 export enum PopUpType {
   LOADING = "loading",
   SUCCESS = "success",

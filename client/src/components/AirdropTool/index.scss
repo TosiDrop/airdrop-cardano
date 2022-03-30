@@ -22,7 +22,7 @@
     margin-bottom: var(--std-separator-width);
   }
 
-  &__row > *:last-child {
+  &__row:last-child {
     margin-bottom: 0;
   }
 

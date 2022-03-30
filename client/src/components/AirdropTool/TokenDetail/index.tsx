@@ -7,7 +7,7 @@ import "./index.scss";
 const COMPONENT_CLASS = "token-detail";
 
 interface Props {
-  sendToken: Function;
+  execAirdrop: Function;
   validateAirdropRequest: Function;
   adaToSpend: Number;
   fee: number;
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export default function TokenDetail({
-  sendToken,
+  execAirdrop,
   adaToSpend,
   fee,
   validateAirdropRequest,
@@ -44,18 +44,14 @@ export default function TokenDetail({
           {totalAmountToAirdrop} {selectedToken.name}
         </span>
       </div>
-      {isAbleToAirdrop ? (
-        <>
-          <div className={`${COMPONENT_CLASS}__row`}>
-            <span>Total ADA to spend</span>
-            <span>{adaToSpend} ADA</span>
-          </div>
-          <div className={`${COMPONENT_CLASS}__row`}>
-            <span>Estimated transaction fee</span>
-            <span>{fee} ADA</span>
-          </div>
-        </>
-      ) : null}
+      <div className={`${COMPONENT_CLASS}__row`}>
+        <span>Total ADA to spend</span>
+        <span>{adaToSpend} ADA</span>
+      </div>
+      <div className={`${COMPONENT_CLASS}__row`}>
+        <span>Estimated transaction fee</span>
+        <span>{fee} ADA</span>
+      </div>
       <div className={`${COMPONENT_CLASS}__row`}>
         <Button
           className={ClassNames.TOSIDROP_BTN}
@@ -73,7 +69,7 @@ export default function TokenDetail({
       <div className={`${COMPONENT_CLASS}__row`}>
         <Button
           className={ClassNames.TOSIDROP_BTN}
-          onClick={() => sendToken()}
+          onClick={() => execAirdrop()}
           disabled={!isAbleToAirdrop}
         >
           Airdrop
