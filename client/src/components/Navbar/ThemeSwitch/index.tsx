@@ -5,7 +5,7 @@ import useDualThemeClass from "hooks/useDualThemeClass";
 import { setDarkTheme } from "reducers/globalSlice";
 import "./index.scss";
 
-const COMPONENT_CLASS = "theme-switch"
+const COMPONENT_CLASS = "theme-switch";
 
 export default function ThemeSwitch() {
   const darkMode = useSelector(
@@ -13,7 +13,7 @@ export default function ThemeSwitch() {
   );
   const dispatch = useDispatch();
   const CLASS = useDualThemeClass({
-    className: COMPONENT_CLASS
+    className: COMPONENT_CLASS,
   });
 
   return (

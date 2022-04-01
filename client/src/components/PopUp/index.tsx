@@ -16,7 +16,7 @@ export default function PopUp() {
   const { closePopUp } = usePopUp();
 
   const CLASS = useDualThemeClass({
-    className: CONTAINER_CLASS
+    className: CONTAINER_CLASS,
   });
 
   const getLogoClass = () => {
@@ -56,7 +56,10 @@ export default function PopUp() {
       <div className={`${CLASS} ${getVisibilityClass(show, CONTAINER_CLASS)}`}>
         <h2>{text}</h2>
         {getSymbol(type)}
-        <Button onClick={() => closePopUp()} className={ClassNames.TOSIDROP_BTN}>
+        <Button
+          onClick={() => closePopUp()}
+          className={ClassNames.TOSIDROP_BTN}
+        >
           Close
         </Button>
       </div>

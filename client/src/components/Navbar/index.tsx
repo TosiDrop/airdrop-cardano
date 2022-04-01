@@ -12,7 +12,7 @@ const CONTAINER_CLASS = "navbar";
 
 export default function Navbar() {
   const CLASS = useDualThemeClass({
-    className: CONTAINER_CLASS
+    className: CONTAINER_CLASS,
   });
   const { enableWallet } = useWallet();
   const [btnText, setBtnText] = useState("Connect wallet");
@@ -62,7 +62,9 @@ export default function Navbar() {
         title="Select Wallet"
         content={selectWalletBtns()}
       >
-        <Button className={`${ClassNames.TOSIDROP_BTN} ${CONTAINER_CLASS}__button`}>
+        <Button
+          className={`${ClassNames.TOSIDROP_BTN} ${CONTAINER_CLASS}__button`}
+        >
           {btnText}
           {loadingApi ? <div className="lds-dual-ring"></div> : null}
         </Button>

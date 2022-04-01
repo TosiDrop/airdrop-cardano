@@ -54,7 +54,8 @@
   height: 20px;
   border-radius: 50%;
   border: 2px solid var(--btn-text-color);
-  border-color: var(--btn-text-color) transparent var(--btn-text-color) transparent;
+  border-color: var(--btn-text-color) transparent var(--btn-text-color)
+    transparent;
   animation: lds-dual-ring 1.2s linear infinite;
 }
 

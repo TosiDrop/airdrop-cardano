@@ -1,0 +1,41 @@
+.airdrop-tx {
+  display: flex;
+  align-items: center;
+  padding: var(--std-separator-width);
+  box-sizing: border-box;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-small);
+  margin-bottom: var(--std-separator-width);
+  width: 100%;
+  &:last-child {
+    margin-bottom: 0;
+  }
+  &__header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  &__sign-btn {
+    margin-left: auto;
+    margin-right: var(--std-separator-width);
+  }
+
+  &__status {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-small);
+  }
+
+  &__status-successful {
+    font-size: 1.5rem;
+  }
+  &__status-unsuccessful {
+    font-size: 1.5rem;
+    color: red;
+  }
+  .arco-spin-icon {
+    color: inherit;
+  }
+}

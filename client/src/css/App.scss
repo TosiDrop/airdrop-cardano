@@ -40,12 +40,14 @@
   color: var(--light-color);
   --btn-text-color: var(--dark-color);
   --btn-bg-color: var(--light-gradient);
+  --success: #27ab47;
 }
 
 .app-container-light {
   color: var(--dark-color);
   --btn-text-color: var(--light-color);
   --btn-bg-color: var(--dark-gradient);
+  --success: #27ab47;
 }
 
 .tosidrop-btn {

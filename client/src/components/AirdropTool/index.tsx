@@ -11,7 +11,7 @@ import usePopUp from "hooks/usePopUp";
 import {
   prepareBody,
   sleep,
-  checkFirstAirdropTxStatus,
+  checkTxStatus,
   getAirdrop,
   transact,
 } from "./helper";
@@ -125,15 +125,18 @@ export default function AirdropTool() {
   };
 
   const handleMultiTxAirdrop = async (airdropHash: any) => {
-    setPopUpLoading("Waiting for the first confirmation");
+    setPopUpLoading("Waiting for airdrop confirmation");
     try {
       let firstAirdropTxAdopted: boolean = false;
       while (!firstAirdropTxAdopted) {
-        firstAirdropTxAdopted = await checkFirstAirdropTxStatus(airdropHash);
+        firstAirdropTxAdopted = await checkTxStatus(airdropHash);
         await sleep(500);
       }
       const remainingAirdropTxs = await getAirdrop(airdropHash);
       setTxToSign(remainingAirdropTxs);
+      setPopUpSuccess(
+        "Airdrop transactions are created! Sign the transactions to execute the airdrop."
+      );
       // let cborHex, txId;
       // for (let tx of remainingAirdropTxs) {
       //   cborHex = tx.cborHex;
@@ -171,8 +174,13 @@ export default function AirdropTool() {
       </div>
       <div className={`${COMPONENT_CLASS}__row`}>
         {txToSign.length
-          ? txToSign.map((tx) => (
-              <AirdropTransaction tx={tx} api={api}></AirdropTransaction>
+          ? txToSign.map((tx, i) => (
+              <AirdropTransaction
+                key={tx.description}
+                tx={tx}
+                api={api}
+                i={i}
+              ></AirdropTransaction>
             ))
           : null}
       </div>

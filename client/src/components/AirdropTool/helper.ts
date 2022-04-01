@@ -35,7 +35,7 @@ export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const checkFirstAirdropTxStatus = async (airdropHash: any) => {
+export const checkTxStatus = async (airdropHash: any) => {
   const response = await axios.get(
     `${url}/api/v0/airdrop_status/${airdropHash}`
   );
