@@ -5,10 +5,10 @@ export const supportedWallets = [
     name: WalletName.NAMI,
     displayName: "Nami",
   },
-  {
-    name: WalletName.CCVAULT,
-    displayName: "CCVault",
-  },
+  // {
+  //   name: WalletName.CCVAULT,
+  //   displayName: "CCVault",
+  // },
 ];
 
 export const defaultToken = {
