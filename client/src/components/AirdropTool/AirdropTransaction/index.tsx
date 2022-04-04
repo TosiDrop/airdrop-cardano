@@ -1,28 +1,19 @@
 import { Button, Spin } from "@arco-design/web-react";
 import { IconCheckCircle, IconCloseCircle } from "@arco-design/web-react/icon";
 import { useState } from "react";
-import { ClassNames, TransactionInfo } from "utils";
+import { ClassNames, TransactionInfo, TransactionState } from "utils";
 import { transact, checkTxStatus, sleep } from "../helper";
 import "./index.scss";
 
 const COMPONENT_CLASS = "airdrop-tx";
 
-enum TransactionState {
-  LOADING = "loading",
-  UNSIGNED = "unsigned",
-  SUCCESSSFUL = "successful",
-  UNSUCCESSSFUL = "unsuccessful",
-}
-
-const AirdropTransaction = ({
-  tx,
-  api,
-  i,
-}: {
+interface Props {
   tx: TransactionInfo;
   api: any;
   i: number;
-}) => {
+}
+
+const AirdropTransaction = ({ tx, api, i }: Props) => {
   const [txState, setTxState] = useState<TransactionState>(
     TransactionState.UNSIGNED
   );

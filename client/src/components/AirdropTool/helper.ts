@@ -96,7 +96,7 @@ export const submitTransaction = async (txJson: any) => {
     const submission = txSubmit.data;
     return submission;
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 };
 

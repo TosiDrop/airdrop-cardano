@@ -90,6 +90,13 @@ export enum WalletName {
   CCVAULT = "ccvault",
 }
 
+export enum TransactionState {
+  LOADING = "loading",
+  UNSIGNED = "unsigned",
+  SUCCESSSFUL = "successful",
+  UNSUCCESSSFUL = "unsuccessful",
+}
+
 export type API = object | undefined;
 export type PolicyID = string;
 export type AssetName = string;

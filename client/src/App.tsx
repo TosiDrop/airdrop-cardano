@@ -17,7 +17,7 @@ import usePopUp from "hooks/usePopUp";
 import useDualThemeClass from "hooks/useDualThemeClass";
 import "css/App.scss";
 
-const APP = "App"
+const APP = "App";
 const APP_CONTAINER = "app-container";
 
 function App() {
@@ -39,10 +39,10 @@ function App() {
         if (selectedWallet) {
           enableWallet(selectedWallet);
         }
-        console.log("wallet connected");
+        console.log("[Tosidrop] wallet connected");
         clearInterval(enableWalletInterval);
       } catch (e) {
-        console.log("wallet not ready");
+        console.log("[Tosidrop] wallet not ready");
       }
     }, 100);
     const darkMode = localStorage.getItem("darkMode");

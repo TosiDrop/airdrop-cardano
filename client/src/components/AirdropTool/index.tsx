@@ -40,7 +40,7 @@ export default function AirdropTool() {
   } = useSelector((state: RootStateOrAny) => state.global);
 
   const validateAirdropRequest = async () => {
-    setPopUpLoading("Validating request");
+    setPopUpLoading("Validating request...");
 
     const requestBody = prepareBody(
       selectedToken,
@@ -77,7 +77,7 @@ export default function AirdropTool() {
   };
 
   const execAirdrop = async () => {
-    setPopUpLoading(`Sending ${totalAmountToAirdrop} ${selectedToken.name}`);
+    setPopUpLoading(`Sending ${totalAmountToAirdrop} ${selectedToken.name}...`);
 
     const requestBody = prepareBody(
       selectedToken,
@@ -125,7 +125,7 @@ export default function AirdropTool() {
   };
 
   const handleMultiTxAirdrop = async (airdropHash: any) => {
-    setPopUpLoading("Waiting for airdrop confirmation");
+    setPopUpLoading("Splitting your UTxOs...");
     try {
       let firstAirdropTxAdopted: boolean = false;
       while (!firstAirdropTxAdopted) {
@@ -135,7 +135,7 @@ export default function AirdropTool() {
       const remainingAirdropTxs = await getAirdrop(airdropHash);
       setTxToSign(remainingAirdropTxs);
       setPopUpSuccess(
-        "Airdrop transactions are created! Sign the transactions to execute the airdrop."
+        "Airdrop transactions are created! Please sign the transactions to execute the airdrop"
       );
       // let cborHex, txId;
       // for (let tx of remainingAirdropTxs) {
@@ -144,7 +144,7 @@ export default function AirdropTool() {
       //   const firstAirdropTx = await transact(api, cborHex, txId);
       // }
     } catch (e: any) {
-      console.log(e);
+      console.error(e);
       setPopUpError("Something went wrong");
     }
   };
