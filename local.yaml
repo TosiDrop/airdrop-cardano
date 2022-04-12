@@ -1,0 +1,25 @@
+services:
+  tosidrop-client: 
+    image: node:17-alpine
+    container_name: tosidrop-client
+    ports: 
+      - "80:3000"
+    volumes: 
+      - ./clientv2:/app/tosidrop-client
+    working_dir: /app/tosidrop-client
+    command: sh -c "npm install && npm run dev"
+    networks:
+      - compose
+  tosidrop-server:
+    image: node:17-alpine
+    container_name: tosidrop-server
+    ports: 
+      - "3000:3000"
+    volumes: 
+      - ./mock-server:/app/tosidrop-server
+    working_dir: /app/tosidrop-server
+    command: sh -c "npm install && node index.js"
+    networks:
+      - compose
+networks:
+  compose:
