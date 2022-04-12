@@ -1,0 +1,23 @@
+.token-detail {
+  width: 100%;
+  h2 {
+    margin: 0;
+  }
+  &__row {
+    margin-bottom: var(--std-separator-width);
+    display: flex;
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+  }
+
+  &__row > * {
+    height: fit-content;
+    width: 100%;
+    flex: 1 1;
+  }
+
+  &__row > button {
+    height: 32px;
+  }
+}

@@ -1,0 +1,43 @@
+.airdrop-tool {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 30px;
+  max-width: 500px;
+  padding: calc(1.5 * var(--std-separator-width));
+  background: #000;
+  border-radius: var(--border-radius-small);
+  background-color: var(--semi-transparent) !important;
+  box-shadow: var(--std-box-shadow) !important;
+
+  button:disabled {
+    filter: brightness(0.5);
+  }
+
+  h2 {
+    text-align: center;
+  }
+
+  &__row {
+    width: 100%;
+    margin-bottom: var(--std-separator-width);
+  }
+
+  &__row:last-child {
+    margin-bottom: 0;
+  }
+
+  &__token_input {
+    display: flex;
+    flex-direction: row;
+  }
+
+  &__token_input > *:last-child {
+    margin-left: var(--std-separator-width-half);
+    margin-right: 0;
+  }
+
+  &__token_input > * {
+    flex: 1 1;
+    margin-right: var(--std-separator-width-half);
+  }
+}
