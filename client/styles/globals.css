@@ -1,0 +1,76 @@
+html,
+body,
+#__next {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  width: 100%;
+  height: 100%;
+  background: var(--light-background);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --light-background: linear-gradient(
+      180deg,
+      rgba(155, 217, 242, 0) 41.16%,
+      rgba(255, 255, 255, 0.7) 100%
+    ),
+    linear-gradient(
+      237.67deg,
+      rgba(155, 217, 242, 0) 30.62%,
+      rgba(255, 215, 138, 0.33) 100%
+    ),
+    linear-gradient(
+      121.92deg,
+      rgba(155, 217, 242, 0) 31.4%,
+      rgba(255, 215, 138, 0.33) 100%
+    ),
+    linear-gradient(
+      115.18deg,
+      rgba(186, 168, 230, 0.5) -35.29%,
+      rgba(186, 168, 230, 0) 57.9%
+    ),
+    linear-gradient(
+      245.41deg,
+      rgba(186, 168, 230, 0.55) -12.18%,
+      rgba(155, 217, 242, 0) 56.8%
+    ),
+    linear-gradient(0deg, rgba(226, 216, 250, 0.12), rgba(226, 216, 250, 0.12)),
+    linear-gradient(0deg, #bcd4f2, #bcd4f2);
+  --dark-background: linear-gradient(
+      180deg,
+      rgba(0, 68, 105, 0) 55.42%,
+      rgba(0, 0, 0, 0.45) 102.55%
+    ),
+    linear-gradient(
+      237.69deg,
+      rgba(45, 45, 45, 0) 30.63%,
+      rgba(188, 212, 242, 0.2) 125.87%
+    ),
+    linear-gradient(
+      120.81deg,
+      rgba(133, 133, 133, 0) 31.32%,
+      rgba(255, 215, 138, 0.2) 123.21%
+    ),
+    linear-gradient(
+      122.33deg,
+      rgba(0, 44, 105, 0.5) 0%,
+      rgba(134, 134, 134, 0) 69.38%
+    ),
+    linear-gradient(
+      238.28deg,
+      rgba(39, 54, 133, 0.65) 0%,
+      rgba(130, 130, 130, 0) 68.22%
+    ),
+    linear-gradient(0deg, #002c69, #002c69);
+}
