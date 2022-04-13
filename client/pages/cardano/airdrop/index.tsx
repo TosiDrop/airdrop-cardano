@@ -1,10 +1,11 @@
 import type { NextPage } from "next";
 import styles from "./Airdrop.module.scss";
+import Navbar from "components/Navbar"
 
 const Airdrop: NextPage = () => {
   return (
     <div className={styles.Airdrop}>
-      <h1>Hello</h1>
+      <Navbar/>
     </div>
   );
 };

@@ -1,0 +1,23 @@
+.ToolSelector {
+  width: fit-content;
+  background: var(--component-background);
+  margin: 0; 
+  border-radius: var(--border-radius);
+  * {
+    color: inherit;
+  }
+  :global(.arco-radio-button) {
+    transition: 0.2s;
+    &::after {
+      background: var(--component-background);
+    }
+    &:hover {
+      background-color: rgba(255,255,255,0.1);
+      color: inherit;
+    }
+  }
+  :global(.arco-radio-checked) {
+    background: var(--button-background);
+    color: inherit;
+  }
+}

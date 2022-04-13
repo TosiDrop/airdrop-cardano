@@ -29,3 +29,4 @@ The `pages/api` directory is mapped to `/api/*`. Files in this directory are tre
 
 > CSS
 1. Put reusable CSS variables into `styles/global.css`
+2. Use `arco.design`framework for components

@@ -7,7 +7,6 @@ body,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   width: 100%;
   height: 100%;
-  background: var(--light-background);
 }
 
 a {
@@ -73,4 +72,11 @@ a {
       rgba(130, 130, 130, 0) 68.22%
     ),
     linear-gradient(0deg, #002c69, #002c69);
+  --dark-color: #303030;
+  --light-color: #ffffff;
+  --border-radius: 4px;
+  --light-component-background: #ffffff;
+  --dark-component-background: #030B13;
+  --light-button-background: linear-gradient(0deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.34)), linear-gradient(262.24deg, #1CABFF -23.63%, #8140FF 133.89%);
+  --dark-button-background: linear-gradient(0deg, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.34)), linear-gradient(262.24deg, #1CABFF -23.63%, #8140FF 133.89%);
 }
