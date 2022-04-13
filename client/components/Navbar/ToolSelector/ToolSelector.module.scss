@@ -1,7 +1,7 @@
 .ToolSelector {
   width: fit-content;
   background: var(--component-background);
-  margin: 0; 
+  margin: 0;
   border-radius: var(--border-radius);
   * {
     color: inherit;
@@ -12,7 +12,7 @@
       background: var(--component-background);
     }
     &:hover {
-      background-color: rgba(255,255,255,0.1);
+      background-color: rgba(255, 255, 255, 0.1);
       color: inherit;
     }
   }

@@ -8,7 +8,7 @@ const Navbar = () => {
         <img src="/logo.png"></img>
         Tosidrop
       </div>
-      <ToolSelector/>
+      <ToolSelector />
     </div>
   );
 };
