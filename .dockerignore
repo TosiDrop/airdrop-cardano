@@ -1,0 +1,12 @@
+.dockerignore
+.git
+.github
+Dockerfile
+ansible
+client/build
+client/node_modules
+clientv2/build
+clientv2/node_modules
+node_modules
+/.env
+.venv
