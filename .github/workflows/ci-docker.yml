@@ -6,7 +6,7 @@ on:
     paths: [ 'Dockerfile','server/**','.github/workflows/ci-docker.yml' ]
   pull_request:
     branches: [ master ]
-    paths: [ 'Dockerfile','server','.github/workflows/ci-docker.yml' ]
+    paths: [ 'Dockerfile','server/**','.github/workflows/ci-docker.yml' ]
 
 env:
   REGISTRY: ghcr.io
