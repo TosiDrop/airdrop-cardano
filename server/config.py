@@ -6,7 +6,7 @@ network: switch between mainnet and testnet
 """
 # CARDANO_NET = os.getenv('CARDANO_NET', '--mainnet')
 # MAGIC_NUMBER = os.getenv('MAGIC_NUMBER', '')
-CARDANO_NET = os.getenv('CARDANO_NETWORK', '--testnet-magic')
+CARDANO_NET = os.getenv('CARDANO_NET', '--testnet-magic')
 MAGIC_NUMBER = os.getenv('MAGIC_NUMBER', '1097911063')
 
 # addresses and spending keys
