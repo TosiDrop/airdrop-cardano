@@ -1,7 +1,7 @@
 FROM python:3.9 AS base
 
 WORKDIR /app
-COPY server .
+COPY . .
 RUN mkdir -p db files transactions wallet && \
     touch db/.keep files/.keep transactions/.keep wallet/.keep && \
     pip install -r requirements.txt && \
