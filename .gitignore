@@ -1,6 +1,12 @@
-**/node_modules
 .idea
 .vscode
 note.md
 temp
 .docker
+
+# Our app
+files
+db
+transactions
+*wallet*
+__pycache__
